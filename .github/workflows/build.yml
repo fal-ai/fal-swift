@@ -7,26 +7,11 @@ on:
   pull_request:
 
 jobs:
-  build-library:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Install Swift
-      run: |
-        sudo apt-get update
-        sudo apt-get install swift
     - name: Build Library
       run: swift build --target FalClient
-    # - name: Test Library
-    #   run: swift test --target FalClient
-
-  # build-sample-app:
-  #   runs-on: macos-latest
-  #   steps:
-  #   - uses: actions/checkout@v4
-  #   - name: Select Xcode version
-  #     run: sudo xcode-select -switch /Applications/Xcode_12.4.app
-  #   - name: Build Sample App
-  #     run: xcodebuild -scheme FalSampleApp -sdk macosx
-  #   - name: Test Sample App
-  #     run: xcodebuild test -scheme FalSampleApp -sdk macosx
+    - name: Build Sample App
+      run: xcodebuild -project Sources/FalSampleApp/FalSampleApp.xcodeproj -scheme FalSampleApp
