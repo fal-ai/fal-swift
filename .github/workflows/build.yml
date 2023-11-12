@@ -11,6 +11,9 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: swift-actions/setup-swift@v1
+      with:
+        swift-version: "5.9.1"
     - name: Build Library
       run: swift build --target FalClient
     - name: Build Sample App
