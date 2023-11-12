@@ -1,10 +1,3 @@
-//
-//  FalSampleAppApp.swift
-//  FalSampleApp
-//
-//  Created by Daniel Rochetti on 11/5/23.
-//
-
 import SwiftUI
 
 @main

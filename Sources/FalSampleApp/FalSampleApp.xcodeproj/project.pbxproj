@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,6 +11,9 @@
 		345BF2542AF7980C00BAA969 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 345BF2532AF7980C00BAA969 /* ContentView.swift */; };
 		345BF2562AF7980D00BAA969 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 345BF2552AF7980D00BAA969 /* Assets.xcassets */; };
 		345BF25A2AF7980D00BAA969 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 345BF2592AF7980D00BAA969 /* Preview Assets.xcassets */; };
+		347ECB5E2AFF82220044CCC1 /* fal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347ECB5D2AFF82220044CCC1 /* fal.swift */; };
+		347ECB612AFF83B10044CCC1 /* FalClient in Frameworks */ = {isa = PBXBuildFile; productRef = 347ECB602AFF83B10044CCC1 /* FalClient */; };
+		347ECB642AFF84B50044CCC1 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 347ECB632AFF84B50044CCC1 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +23,7 @@
 		345BF2552AF7980D00BAA969 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		345BF2572AF7980D00BAA969 /* FalSampleApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FalSampleApp.entitlements; sourceTree = "<group>"; };
 		345BF2592AF7980D00BAA969 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		347ECB5D2AFF82220044CCC1 /* fal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = fal.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -27,6 +31,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				347ECB642AFF84B50044CCC1 /* Kingfisher in Frameworks */,
+				347ECB612AFF83B10044CCC1 /* FalClient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -52,10 +58,11 @@
 		345BF2502AF7980C00BAA969 /* FalSampleApp */ = {
 			isa = PBXGroup;
 			children = (
-				345BF2512AF7980C00BAA969 /* FalSampleAppApp.swift */,
-				345BF2532AF7980C00BAA969 /* ContentView.swift */,
 				345BF2552AF7980D00BAA969 /* Assets.xcassets */,
+				345BF2532AF7980C00BAA969 /* ContentView.swift */,
+				347ECB5D2AFF82220044CCC1 /* fal.swift */,
 				345BF2572AF7980D00BAA969 /* FalSampleApp.entitlements */,
+				345BF2512AF7980C00BAA969 /* FalSampleAppApp.swift */,
 				345BF2582AF7980D00BAA969 /* Preview Content */,
 			);
 			path = FalSampleApp;
@@ -85,6 +92,10 @@
 			dependencies = (
 			);
 			name = FalSampleApp;
+			packageProductDependencies = (
+				347ECB602AFF83B10044CCC1 /* FalClient */,
+				347ECB632AFF84B50044CCC1 /* Kingfisher */,
+			);
 			productName = FalSampleApp;
 			productReference = 345BF24E2AF7980C00BAA969 /* FalSampleApp.app */;
 			productType = "com.apple.product-type.application";
@@ -113,6 +124,10 @@
 				Base,
 			);
 			mainGroup = 345BF2452AF7980C00BAA969;
+			packageReferences = (
+				347ECB5F2AFF83B10044CCC1 /* XCLocalSwiftPackageReference "../.." */,
+				347ECB622AFF84B50044CCC1 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+			);
 			productRefGroup = 345BF24F2AF7980C00BAA969 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -139,6 +154,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				347ECB5E2AFF82220044CCC1 /* fal.swift in Sources */,
 				345BF2542AF7980C00BAA969 /* ContentView.swift in Sources */,
 				345BF2522AF7980C00BAA969 /* FalSampleAppApp.swift in Sources */,
 			);
@@ -282,10 +298,10 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.fal.FalSampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -318,10 +334,10 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ai.fal.FalSampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -355,6 +371,36 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		347ECB5F2AFF83B10044CCC1 /* XCLocalSwiftPackageReference "../.." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../..;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		347ECB622AFF84B50044CCC1 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		347ECB602AFF83B10044CCC1 /* FalClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FalClient;
+		};
+		347ECB632AFF84B50044CCC1 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 347ECB622AFF84B50044CCC1 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 345BF2462AF7980C00BAA969 /* Project object */;
 }

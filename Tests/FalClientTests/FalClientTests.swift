@@ -1,5 +1,5 @@
-import XCTest
 @testable import FalClient
+import XCTest
 
 final class FalClientTests: XCTestCase {
     func testExample() throws {
