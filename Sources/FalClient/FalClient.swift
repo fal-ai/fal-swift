@@ -4,6 +4,25 @@ func buildUrl(fromId id: String, path: String? = nil) -> String {
     "https://\(id).gateway.alpha.fal.ai" + (path ?? "")
 }
 
+/// The main client class that provides access to simple API model usage,
+/// as well as access to the `queue` and `storage` APIs.
+///
+/// Example:
+///
+/// ```swift
+/// import FalClient
+///
+/// let fal = FalClient.withCredentials("fal_key_id:fal_key_secret");
+///
+/// void main() async {
+///   // check https://fal.ai/models for the available models
+///   final result = await fal.subscribe(to: 'text-to-image', input: {
+///     'prompt': 'a cute shih-tzu puppy',
+///     'model_name': 'stabilityai/stable-diffusion-xl-base-1.0',
+///   });
+///   print(result);
+/// }
+/// ```
 public struct FalClient: Client {
     public let config: ClientConfig
 
@@ -49,10 +68,10 @@ public struct FalClient: Client {
         }
         return try await queue.response(id, of: requestId)
     }
+}
 
-    public static let shared: Client = Self(config: ClientConfig())
-
-    public static func withProxy(_ url: String) -> Client {
-        return Self(config: ClientConfig(requestProxy: url))
+public extension FalClient {
+    static func withProxy(_ url: String) -> FalClient {
+        return FalClient(config: ClientConfig(requestProxy: url))
     }
 }

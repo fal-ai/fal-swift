@@ -1,0 +1,22 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: swift-actions/setup-swift@v1
+      with:
+        swift-version: "5.9"
+    - name: Check format
+      run: swift package plugin --allow-writing-to-package-directory swiftformat .
+    - name: Build Library
+      run: swift build --target FalClient --configuration release
+    # - name: Build Sample App
+    #   run: xcodebuild -project Sources/FalSampleApp/FalSampleApp.xcodeproj -scheme FalSampleApp
