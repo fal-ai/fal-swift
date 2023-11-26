@@ -17,9 +17,7 @@ struct ContentView: View {
                         print("Generate image...")
                         isLoading = true
                         do {
-                            let result = try await fal.subscribe("110602490-lora", input: [
-                                "model_name": "stabilityai/stable-diffusion-xl-base-1.0",
-                                "image_size": "square_hd",
+                            let result = try await fal.subscribe("110602490-fast-sdxl", input: [
                                 "prompt": PROMPT,
                             ], includeLogs: true) { update in
                                 print(update)
