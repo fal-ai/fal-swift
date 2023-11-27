@@ -1,3 +1,4 @@
+import Dispatch
 import Foundation
 
 func buildUrl(fromId id: String, path: String? = nil) -> String {
@@ -41,8 +42,8 @@ public struct FalClient: Client {
     public func subscribe(
         _ id: String,
         input: [String: Any]?,
-        pollInterval: FalTimeInterval,
-        timeout: FalTimeInterval,
+        pollInterval: DispatchTimeInterval,
+        timeout: DispatchTimeInterval,
         includeLogs: Bool,
         options _: RunOptions,
         onQueueUpdate: OnQueueUpdate?

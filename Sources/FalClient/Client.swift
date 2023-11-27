@@ -1,3 +1,4 @@
+import Dispatch
 import Foundation
 
 enum HttpMethod: String {
@@ -39,8 +40,8 @@ public protocol Client {
     func subscribe(
         _ id: String,
         input: [String: Any]?,
-        pollInterval: FalTimeInterval,
-        timeout: FalTimeInterval,
+        pollInterval: DispatchTimeInterval,
+        timeout: DispatchTimeInterval,
         includeLogs: Bool,
         options: RunOptions,
         onQueueUpdate: OnQueueUpdate?
@@ -55,8 +56,8 @@ public extension Client {
     func subscribe(
         _ id: String,
         input: [String: Any]? = nil,
-        pollInterval: FalTimeInterval = .seconds(1),
-        timeout: FalTimeInterval = .minutes(3),
+        pollInterval: DispatchTimeInterval = .seconds(1),
+        timeout: DispatchTimeInterval = .minutes(3),
         includeLogs: Bool = false,
         options: RunOptions = DefaultRunOptions,
         onQueueUpdate: OnQueueUpdate? = nil

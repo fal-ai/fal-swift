@@ -1,3 +1,4 @@
+import Dispatch
 import Foundation
 
 public struct EmptyInput: Encodable {
@@ -34,8 +35,8 @@ public extension Client {
     func subscribe<Output: Decodable>(
         _ id: String,
         input: (some Encodable) = EmptyInput.empty,
-        pollInterval: FalTimeInterval = .seconds(1),
-        timeout: FalTimeInterval = .minutes(3),
+        pollInterval: DispatchTimeInterval = .seconds(1),
+        timeout: DispatchTimeInterval = .minutes(3),
         includeLogs: Bool = false,
         options _: RunOptions = DefaultRunOptions,
         onQueueUpdate: OnQueueUpdate? = nil
