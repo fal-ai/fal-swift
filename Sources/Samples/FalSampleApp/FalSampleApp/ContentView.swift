@@ -17,7 +17,7 @@ struct ContentView: View {
                         print("Generate image...")
                         isLoading = true
                         do {
-                            let result = try await fal.subscribe("110602490-fast-sdxl", input: [
+                            let result = try await fal.subscribe(to: "110602490-fast-sdxl", input: [
                                 "prompt": PROMPT,
                             ], includeLogs: true) { update in
                                 print(update)

@@ -1,8 +1,7 @@
 import Foundation
 
 extension Client {
-    func sendRequest(_ id: String, input: Data?, queryParams: [String: Any]? = nil, options: RequestOptions) async throws -> Data {
-        let urlString = buildUrl(fromId: id, path: options.path)
+    func sendRequest(_ urlString: String, input: Data?, queryParams: [String: Any]? = nil, options: RunOptions) async throws -> Data {
         guard var url = URL(string: urlString) else {
             throw FalError.invalidUrl(url: urlString)
         }
@@ -49,6 +48,6 @@ extension Client {
 
     var userAgent: String {
         let osVersion = ProcessInfo.processInfo.operatingSystemVersionString
-        return "fal.ai/swift-client 0.0.1 - \(osVersion)"
+        return "fal.ai/swift-client 0.1.0 - \(osVersion)"
     }
 }

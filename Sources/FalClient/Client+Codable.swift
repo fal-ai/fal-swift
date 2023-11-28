@@ -19,7 +19,7 @@ public extension Client {
     }
 
     func run<Output: Decodable>(
-        _ id: String,
+        _ app: String,
         input: (some Encodable) = EmptyInput.empty,
         options: RunOptions = DefaultRunOptions
     ) async throws -> Output {
@@ -28,25 +28,25 @@ public extension Client {
             ? try JSONSerialization.jsonObject(with: inputData!) as? [String: Any]
             : nil
 
-        let data = try await sendRequest(id, input: inputData, queryParams: queryParams, options: options)
+        let url = buildUrl(fromId: app, path: options.path)
+        let data = try await sendRequest(url, input: inputData, queryParams: queryParams, options: options)
         return try decoder.decode(Output.self, from: data)
     }
 
     func subscribe<Output: Decodable>(
-        _ id: String,
+        to app: String,
         input: (some Encodable) = EmptyInput.empty,
         pollInterval: DispatchTimeInterval = .seconds(1),
         timeout: DispatchTimeInterval = .minutes(3),
         includeLogs: Bool = false,
-        options _: RunOptions = DefaultRunOptions,
         onQueueUpdate: OnQueueUpdate? = nil
     ) async throws -> Output {
-        let requestId = try await queue.submit(id, input: input)
+        let requestId = try await queue.submit(app, input: input)
         let start = Int(Date().timeIntervalSince1970 * 1000)
         var elapsed = 0
         var isCompleted = false
         while elapsed < timeout.milliseconds {
-            let update = try await queue.status(id, of: requestId, includeLogs: includeLogs)
+            let update = try await queue.status(app, of: requestId, includeLogs: includeLogs)
             if let onQueueUpdateCallback = onQueueUpdate {
                 onQueueUpdateCallback(update)
             }
@@ -60,6 +60,6 @@ public extension Client {
         if !isCompleted {
             throw FalError.queueTimeout
         }
-        return try await queue.response(id, of: requestId)
+        return try await queue.response(app, of: requestId)
     }
 }
