@@ -83,7 +83,7 @@ Check the `Sources/Samples` folder for a handful of sample applications using th
 Open them with `xed` to quickly start playing with 
 
 ```bash
-xed Sources/Sample/FalSampleApp
+xed Sources/Samples/FalSampleApp
 ```
 
 ## Roadmap
