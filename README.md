@@ -24,7 +24,10 @@ This Swift client library is crafted as a lightweight layer atop Swift's network
 2. Set up the client instance:
    ```swift
    import FalClient
-   let fal = FalClient(withCredentials: "FAL_KEY_ID:FAL_KEY_SECRET")
+   let fal = FalClient.withCredentials(.keyPair("FAL_KEY_ID:FAL_KEY_SECRET"))
+
+   // You can also use a proxy to protect your credentials
+   // let fal = FalClient.withProxy("http://localhost:3333/api/fal/proxy")
    ```
 
 3. Use `fal.subscribe` to dispatch requests to the model API:
@@ -40,10 +43,48 @@ This Swift client library is crafted as a lightweight layer atop Swift's network
    ```
 
 **Notes:**
+
 - Replace `text-to-image` with a valid model id. Check [fal.ai/models](https://fal.ai/models) for all available models.
 - It fully relies on `async/await` for asynchronous programming.
 - The result type in Swift will be a `[String: Any]` and the entries depend on the API output schema.
 - The Swift client also supports typed inputs and outputs through `Codable`.
+
+## Real-time 
+
+The client supports real-time model APIs. Checkout the [FalRealtimeSampleApp](./Sources/Samples/FalRealtimeSampleApp/) for more details.
+
+```swift
+let connection = try fal.realtime.connect(
+    to: OptimizedLatentConsistency,
+    connectionKey: "PencilKitDemo",
+    throttleInterval: .milliseconds(128)
+) { (result: Result<LcmResponse, Error>)  in
+    if case let .success(data) = result,
+        let image = data.images.first {
+        let data = try? Data(contentsOf: URL(string: image.url)!)
+        DispatchQueue.main.async {
+            self.currentImage = data
+        }
+    }
+}
+
+try connection.send(LcmInput(
+    prompt: prompt,
+    imageUrl: "data:image/jpeg;base64,\(drawing.base64EncodedString())",
+    seed: 6_252_023,
+    syncMode: true
+))
+```
+
+## Sample apps
+
+Check the `Sources/Samples` folder for a handful of sample applications using the `FalClient`.
+
+Open them with `xed` to quickly start playing with 
+
+```bash
+xed Sources/Sample/FalSampleApp
+```
 
 ## Roadmap
 

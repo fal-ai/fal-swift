@@ -1,3 +1,4 @@
+import Dispatch
 import Foundation
 
 func buildUrl(fromId id: String, path: String? = nil) -> String {
@@ -28,10 +29,13 @@ public struct FalClient: Client {
 
     public var queue: Queue { QueueClient(client: self) }
 
-    public func run(_ id: String, input: [String: Any]?, options: RunOptions) async throws -> [String: Any] {
+    public var realtime: Realtime { RealtimeClient(client: self) }
+
+    public func run(_ app: String, input: [String: Any]?, options: RunOptions) async throws -> [String: Any] {
         let inputData = input != nil ? try JSONSerialization.data(withJSONObject: input as Any) : nil
         let queryParams = options.httpMethod == .get ? input : nil
-        let data = try await sendRequest(id, input: inputData, queryParams: queryParams, options: options)
+        let url = buildUrl(fromId: app, path: options.path)
+        let data = try await sendRequest(url, input: inputData, queryParams: queryParams, options: options)
         guard let result = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw FalError.invalidResultFormat
         }
@@ -39,20 +43,19 @@ public struct FalClient: Client {
     }
 
     public func subscribe(
-        _ id: String,
+        to app: String,
         input: [String: Any]?,
-        pollInterval: FalTimeInterval,
-        timeout: FalTimeInterval,
+        pollInterval: DispatchTimeInterval,
+        timeout: DispatchTimeInterval,
         includeLogs: Bool,
-        options _: RunOptions,
         onQueueUpdate: OnQueueUpdate?
     ) async throws -> [String: Any] {
-        let requestId = try await queue.submit(id, input: input)
+        let requestId = try await queue.submit(app, input: input)
         let start = Int(Date().timeIntervalSince1970 * 1000)
         var elapsed = 0
         var isCompleted = false
         while elapsed < timeout.milliseconds {
-            let update = try await queue.status(id, of: requestId, includeLogs: includeLogs)
+            let update = try await queue.status(app, of: requestId, includeLogs: includeLogs)
             if let onQueueUpdateCallback = onQueueUpdate {
                 onQueueUpdateCallback(update)
             }
@@ -66,12 +69,16 @@ public struct FalClient: Client {
         if !isCompleted {
             throw FalError.queueTimeout
         }
-        return try await queue.response(id, of: requestId)
+        return try await queue.response(app, of: requestId)
     }
 }
 
 public extension FalClient {
-    static func withProxy(_ url: String) -> FalClient {
+    static func withProxy(_ url: String) -> Client {
         return FalClient(config: ClientConfig(requestProxy: url))
+    }
+
+    static func withCredentials(_ credentials: ClientCredentials) -> Client {
+        return FalClient(config: ClientConfig(credentials: credentials))
     }
 }

@@ -6,8 +6,8 @@ import PackageDescription
 let package = Package(
     name: "FalClient",
     platforms: [
-        .iOS(.v13),
-        .macOS(.v11),
+        .iOS(.v15),
+        .macOS(.v12),
         .macCatalyst(.v13),
         .tvOS(.v13),
         .watchOS(.v8),
@@ -20,17 +20,25 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.50.4"),
+        .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.52.10"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
-        .target(
-            name: "FalClient"),
+        .target(name: "FalClient"),
         .testTarget(
             name: "FalClientTests",
             dependencies: ["FalClient"]
         ),
-        .target(name: "FalSampleApp", dependencies: ["FalClient"]),
+        .target(
+            name: "FalSampleApp",
+            dependencies: ["FalClient"],
+            path: "Sources/Samples/FalSampleApp"
+        ),
+        .target(
+            name: "FalRealtimeSampleApp",
+            dependencies: ["FalClient"],
+            path: "Sources/Samples/FalRealtimeSampleApp"
+        ),
     ]
 )
