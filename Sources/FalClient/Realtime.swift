@@ -185,6 +185,7 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
                 }
             case let .failure(error):
                 self?.onError(error)
+                self?.task = nil
             }
         }
     }
