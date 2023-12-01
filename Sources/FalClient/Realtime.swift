@@ -19,6 +19,7 @@ public enum FalRealtimeError: Error {
     case connectionError
     case unauthorized
     case invalidResult
+    case serviceError(type: String, reason: String)
 }
 
 public class RealtimeConnection<Input> {
@@ -165,6 +166,7 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
             switch incomingMessage {
             case let .success(message):
                 do {
+                    self?.receiveMessage()
                     let data = try message.data()
                     guard let parsedMessage = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
                         self?.onError(FalRealtimeError.invalidResult)
@@ -172,18 +174,18 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
                     }
                     if isSuccessResult(parsedMessage) {
                         self?.onMessage(data)
+                        return
                     }
-//                    if (parsedMessage["status"] as? String != "error") {
-//                        self?.task?.cancel()
-//                    }
-
+                    if let error = getError(parsedMessage) {
+                        self?.onError(error)
+                        return
+                    }
                 } catch {
                     self?.onError(error)
                 }
             case let .failure(error):
                 self?.onError(error)
             }
-            self?.receiveMessage()
         }
     }
 
@@ -251,7 +253,18 @@ public protocol Realtime {
 }
 
 func isSuccessResult(_ message: [String: Any]) -> Bool {
-    return message["status"] as? String != "error" && message["type"] as? String != "x-fal-message"
+    return message["status"] as? String != "error"
+        && message["type"] as? String != "x-fal-message"
+        && message["type"] as? String != "x-fal-error"
+}
+
+func getError(_ message: [String: Any]) -> FalRealtimeError? {
+    if message["type"] as? String != "x-fal-error",
+       let error = message["error"] as? String,
+       let reason = message["reason"] as? String {
+        return FalRealtimeError.serviceError(type: error, reason: reason)
+    }
+    return nil
 }
 
 extension URLSessionWebSocketTask.Message {
