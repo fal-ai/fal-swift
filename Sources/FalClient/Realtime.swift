@@ -145,9 +145,6 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
                 params: connectionParams,
                 token: token
             )
-            // print("================================")
-            // print("Connecting to \(url)")
-            // print("================================")
             let webSocketTask = session.webSocketTask(with: url)
             webSocketTask.delegate = self
             task = webSocketTask
@@ -186,7 +183,6 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
 
     func receiveMessage() {
         task?.receive { [weak self] incomingMessage in
-            print("fal.realtime.receiveMessage")
             switch incomingMessage {
             case let .success(message):
                 do {
