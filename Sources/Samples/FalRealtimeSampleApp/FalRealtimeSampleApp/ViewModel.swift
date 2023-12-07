@@ -10,7 +10,7 @@ struct LcmInput: Encodable {
     let imageUrl: String
     let seed: Int
     let syncMode: Bool
-    
+
     enum CodingKeys: String, CodingKey {
         case prompt
         case imageUrl = "image_url"
@@ -42,9 +42,10 @@ class LiveImage: ObservableObject {
             to: OptimizedLatentConsistency,
             connectionKey: "PencilKitDemo",
             throttleInterval: .milliseconds(128)
-        ) { (result: Result<LcmResponse, Error>)  in
+        ) { (result: Result<LcmResponse, Error>) in
             if case let .success(data) = result,
-               let image = data.images.first {
+               let image = data.images.first
+            {
                 let data = try? Data(contentsOf: URL(string: image.url)!)
                 DispatchQueue.main.async {
                     self.currentImage = data

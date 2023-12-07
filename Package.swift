@@ -36,6 +36,11 @@ let package = Package(
             path: "Sources/Samples/FalSampleApp"
         ),
         .target(
+            name: "FalCameraSampleApp",
+            dependencies: ["FalClient"],
+            path: "Sources/Samples/FalCameraSampleApp"
+        ),
+        .target(
             name: "FalRealtimeSampleApp",
             dependencies: ["FalClient"],
             path: "Sources/Samples/FalRealtimeSampleApp"

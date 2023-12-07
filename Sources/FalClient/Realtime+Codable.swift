@@ -3,8 +3,11 @@ import Foundation
 
 class CodableRealtimeConnection<Input: Encodable>: RealtimeConnection<Input> {
     override public func send(_ data: Input) throws {
-        let json = try JSONEncoder().encode(data)
-        try sendReference(json)
+        let jsonData = try JSONEncoder().encode(data)
+        guard let json = String(data: jsonData, encoding: .utf8) else {
+            throw FalRealtimeError.invalidResult
+        }
+        try sendReference(.string(json))
     }
 }
 
