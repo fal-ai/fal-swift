@@ -15,7 +15,7 @@ public extension Queue {
     }
 
     func response<Output: Decodable>(_ id: String, of requestId: String) async throws -> Output {
-        return try await client.run(
+        try await client.run(
             id,
             input: EmptyInput.empty,
             options: .route("/fal/queue/requests/\(requestId)/response", withMethod: .get)

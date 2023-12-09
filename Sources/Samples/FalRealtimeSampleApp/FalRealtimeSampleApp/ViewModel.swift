@@ -55,7 +55,7 @@ class LiveImage: ObservableObject {
     }
 
     func generate(prompt: String, drawing: Data) throws {
-        if let connection = connection {
+        if let connection {
             try connection.send(LcmInput(
                 prompt: prompt,
                 imageUrl: "data:image/jpeg;base64,\(drawing.base64EncodedString())",

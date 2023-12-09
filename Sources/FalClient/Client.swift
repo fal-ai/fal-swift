@@ -51,7 +51,7 @@ public protocol Client {
 
 public extension Client {
     func run(_ app: String, input: [String: Any]? = nil, options: RunOptions = DefaultRunOptions) async throws -> [String: Any] {
-        return try await run(app, input: input, options: options)
+        try await run(app, input: input, options: options)
     }
 
     func subscribe(
@@ -62,11 +62,11 @@ public extension Client {
         includeLogs: Bool = false,
         onQueueUpdate: OnQueueUpdate? = nil
     ) async throws -> [String: Any] {
-        return try await subscribe(to: app,
-                                   input: input,
-                                   pollInterval: pollInterval,
-                                   timeout: timeout,
-                                   includeLogs: includeLogs,
-                                   onQueueUpdate: onQueueUpdate)
+        try await subscribe(to: app,
+                            input: input,
+                            pollInterval: pollInterval,
+                            timeout: timeout,
+                            includeLogs: includeLogs,
+                            onQueueUpdate: onQueueUpdate)
     }
 }

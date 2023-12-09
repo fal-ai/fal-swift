@@ -75,10 +75,10 @@ public struct FalClient: Client {
 
 public extension FalClient {
     static func withProxy(_ url: String) -> Client {
-        return FalClient(config: ClientConfig(requestProxy: url))
+        FalClient(config: ClientConfig(requestProxy: url))
     }
 
     static func withCredentials(_ credentials: ClientCredentials) -> Client {
-        return FalClient(config: ClientConfig(credentials: credentials))
+        FalClient(config: ClientConfig(credentials: credentials))
     }
 }

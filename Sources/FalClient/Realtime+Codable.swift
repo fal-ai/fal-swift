@@ -18,7 +18,7 @@ public extension Realtime {
         throttleInterval: DispatchTimeInterval,
         onResult completion: @escaping (Result<Output, Error>) -> Void
     ) throws -> RealtimeConnection<Input> {
-        return handleConnection(
+        handleConnection(
             to: app, connectionKey: connectionKey, throttleInterval: throttleInterval,
             resultConverter: { data in
                 let result = try JSONDecoder().decode(Output.self, from: data)

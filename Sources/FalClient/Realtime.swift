@@ -22,6 +22,21 @@ public enum FalRealtimeError: Error {
     case serviceError(type: String, reason: String)
 }
 
+extension FalRealtimeError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .connectionError:
+            return NSLocalizedString("Connection error", comment: "FalRealtimeError.connectionError")
+        case .unauthorized:
+            return NSLocalizedString("Unauthorized", comment: "FalRealtimeError.unauthorized")
+        case .invalidResult:
+            return NSLocalizedString("Invalid result", comment: "FalRealtimeError.invalidResult")
+        case let .serviceError(type, reason):
+            return NSLocalizedString("\(type): \(reason)", comment: "FalRealtimeError.serviceError")
+        }
+    }
+}
+
 typealias SendFunction = (URLSessionWebSocketTask.Message) throws -> Void
 typealias CloseFunction = () -> Void
 
@@ -65,7 +80,7 @@ func buildRealtimeUrl(forApp app: String, host: String, params: [String: Any] = 
     components.host = "\(app).\(host)"
     components.path = "/ws"
 
-    if let token = token {
+    if let token {
         components.queryItems = [URLQueryItem(name: "fal_jwt_token", value: token)]
     }
 
@@ -110,9 +125,9 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
     }
 
     func connect() {
-        if task == nil && !isConnecting && !isRefreshingToken {
+        if task == nil, !isConnecting, !isRefreshingToken {
             isConnecting = true
-            if token == nil && !isRefreshingToken {
+            if token == nil, !isRefreshingToken {
                 isRefreshingToken = true
                 refreshToken(app) { result in
                     switch result {
@@ -217,9 +232,9 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
     }
 
     func send(_ message: URLSessionWebSocketTask.Message) throws {
-        if let task = task {
+        if let task {
             task.send(message) { [weak self] error in
-                if let error = error {
+                if let error {
                     self?.onError(error)
                 }
             }
@@ -276,7 +291,7 @@ public protocol Realtime {
 }
 
 func isSuccessResult(_ message: [String: Any]) -> Bool {
-    return message["status"] as? String != "error"
+    message["status"] as? String != "error"
         && message["type"] as? String != "x-fal-message"
         && message["type"] as? String != "x-fal-error"
 }
@@ -322,7 +337,7 @@ public struct RealtimeClient: Realtime {
         throttleInterval: DispatchTimeInterval,
         onResult completion: @escaping (Result<[String: Any], Error>) -> Void
     ) throws -> RealtimeConnection<[String: Any]> {
-        return handleConnection(
+        handleConnection(
             to: app,
             connectionParams: [:],
             connectionKey: connectionKey,
@@ -394,7 +409,7 @@ public extension Realtime {
         throttleInterval: DispatchTimeInterval = .milliseconds(64),
         onResult completion: @escaping (Result<[String: Any], Error>) -> Void
     ) throws -> RealtimeConnection<[String: Any]> {
-        return try connect(
+        try connect(
             to: app,
             connectionKey: connectionKey,
             throttleInterval: throttleInterval,
@@ -409,7 +424,7 @@ public extension Realtime {
         throttleInterval: DispatchTimeInterval,
         onResult completion: @escaping (Result<Data, Error>) -> Void
     ) throws -> RealtimeConnection<Data> {
-        return handleConnection(
+        handleConnection(
             to: app,
             connectionParams: input,
             connectionKey: connectionKey,

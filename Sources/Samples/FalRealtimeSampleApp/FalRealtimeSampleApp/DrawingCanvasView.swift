@@ -28,7 +28,7 @@ struct DrawingCanvasView: UIViewRepresentable {
         canvasView.tool = PKInkingTool(.pen, color: .black, width: 10)
         canvasView.delegate = context.coordinator
         canvasView.addTouchMoveListener { _ in
-            if self.isDrawing {
+            if isDrawing {
 //                self.triggerDrawingChange()
             }
         }
@@ -54,7 +54,7 @@ struct DrawingCanvasView: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        return Coordinator(self)
+        Coordinator(self)
     }
 
     class Coordinator: NSObject, PKCanvasViewDelegate {

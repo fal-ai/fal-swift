@@ -8,134 +8,155 @@ protocol ImageStreamingDelegate: AnyObject {
     func willProcess(image: UIImage)
 }
 
-// class ImageStreaming {
-//    private var processedBuffer: [UIImage] = []
-//    private let processedQueue = DispatchQueue(label: "ai.fal.realtime.processed", attributes: .concurrent)
-//
-//    private var lastFrameTime = DispatchTime.now()
-//    private var lastProcessTime = DispatchTime.now()
-//    private var targetFPS: Double
-//    private var targetFrameInterval: Double {
-//        1.0 / targetFPS
-//    }
-//
-//    weak var delegate: ImageStreamingDelegate?
-//
-//    init(targetFPS: Double = 30.0) {
-//        self.targetFPS = targetFPS
-//    }
-//
-//    func process(image: UIImage) {
-//        let currentTime = DispatchTime.now()
-//        let timeSinceLastProcess = Double(currentTime.uptimeNanoseconds - lastProcessTime.uptimeNanoseconds) / 1_000_000_000
-//
-//        // Rate limiting based on the processing capacity
-//        if timeSinceLastProcess >= targetFrameInterval {
-//            lastProcessTime = currentTime
-//            DispatchQueue.main.async {
-//                self.delegate?.willProcess(image: image)
-//            }
-//            // The actual image processing should be done externally and `doneProcessing(image:)` called afterward
-//        }
-//    }
-//
-//    func doneProcessing(image: UIImage) {
-//        processedQueue.async(flags: .barrier) {
-//            self.processedBuffer.append(image)
-//            self.sendNextProcessedFrameIfReady()
-//        }
-//    }
-//
-//    private func sendNextProcessedFrameIfReady() {
-//        let currentTime = DispatchTime.now()
-//        let timeSinceLastFrame = Double(currentTime.uptimeNanoseconds - lastFrameTime.uptimeNanoseconds) / 1_000_000_000
-//
-//        if timeSinceLastFrame >= targetFrameInterval, !processedBuffer.isEmpty {
-//            let imageToSend = processedBuffer.removeFirst()
-//            lastFrameTime = currentTime
-//            DispatchQueue.main.async {
-//                self.notifyCurrentFPS()
-//                self.delegate?.didReceive(image: imageToSend)
-//            }
-//        }
-//    }
-//
-//    private func notifyCurrentFPS() {
-//        let currentTime = DispatchTime.now()
-//        let timeInterval = Double(currentTime.uptimeNanoseconds - lastFrameTime.uptimeNanoseconds) / 1_000_000_000
-//        if timeInterval > 0 {
-//            let currentFPS = 1.0 / timeInterval
-//            self.delegate?.didUpdate(fps: currentFPS)
-//        }
-//    }
-// }
+struct ImageFrame {
+    let image: UIImage
+    let timestamp: DispatchTime
 
-class ImageStreaming {
-    private let maxBufferSize = 60
+    static func from(image: UIImage) -> Self {
+        ImageFrame(image: image, timestamp: .now())
+    }
+}
 
-    private var incomingBuffer: [UIImage] = []
-    private var processedBuffer: [UIImage] = []
+enum TargetSize {
+    case square
 
-    private let processingQueue = DispatchQueue(label: "ai.fal.realtime.processing", attributes: .concurrent)
-    private let processedQueue = DispatchQueue(label: "ai.fal.realtime.processed", attributes: .concurrent)
+    var dimensions: CGSize {
+        switch self {
+        case .square:
+            return CGSize(width: 512, height: 512)
+        }
+    }
+}
 
-    private var lastFrameTime = DispatchTime.now()
-    private var targetFPS: Double
-    private var targetFrameInterval: Double {
-        1.0 / targetFPS
+extension UIImage {
+    func resize(to targetSize: TargetSize) -> UIImage? {
+        guard let image = cgImage else {
+            return nil
+        }
+        let dimensions = targetSize.dimensions
+        guard let context = CGContext(
+            data: nil,
+            width: Int(size.width),
+            height: Int(size.height),
+            bitsPerComponent: image.bitsPerComponent,
+            bytesPerRow: 0,
+            space: image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!,
+            bitmapInfo: image.bitmapInfo.rawValue
+        ) else {
+            return nil
+        }
+
+        context.interpolationQuality = .default
+        context.draw(image, in: CGRect(origin: .zero, size: size))
+        context.scaleBy(x: dimensions.width / size.width, y: dimensions.height / size.height)
+
+        guard let scaledImage = context.makeImage() else { return nil }
+
+        // https://developer.apple.com/documentation/coregraphics/cgcontext/1456228-rotate#discussion
+        return UIImage(cgImage: scaledImage, scale: 1.0, orientation: imageOrientation).correctImageOrientation()
     }
 
-    private var lastFrameTimestamp = DispatchTime.now()
+    func correctImageOrientation() -> UIImage? {
+        guard let cgImage else { return nil }
+
+        switch imageOrientation {
+        case .up:
+            return self
+        default:
+            UIGraphicsBeginImageContextWithOptions(size, false, scale)
+            draw(in: CGRect(origin: .zero, size: size))
+            let normalizedImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            return normalizedImage
+        }
+    }
+}
+
+class ImageStreaming {
+    private let incomingQueue = DispatchQueue(label: "ai.fal.imagestreaming.incoming", attributes: .concurrent)
+    private let processingQueue = DispatchQueue(label: "ai.fal.imagestreaming.processing", attributes: .concurrent)
+    private var incomingBuffer: [ImageFrame] = []
+
+    private var lastIncomingTime = DispatchTime.now()
+    private var lastProcessedTime = DispatchTime.now()
+    private var processedFrameCount = 0
+    private var targetFPS: Double
+    private var frameDropThreshold: Double
+    private var lastSubmittedFrame: ImageFrame?
 
     weak var delegate: ImageStreamingDelegate?
 
-    init(targetFPS: Double = 30.0) {
+    init(targetFPS: Double = 60.0, frameDropThreshold: Double = 0.1) {
         self.targetFPS = targetFPS
+        self.frameDropThreshold = frameDropThreshold
     }
 
     func process(image: UIImage) {
-        processingQueue.async(flags: .barrier) {
-            if self.incomingBuffer.count >= self.maxBufferSize {
-                self.incomingBuffer.removeFirst()
+        lastIncomingTime = .now()
+        let frame = ImageFrame.from(image: image)
+        lastSubmittedFrame = frame
+
+        incomingQueue.async(flags: .barrier) {
+            self.incomingBuffer.append(frame)
+            self.processNextImage()
+        }
+    }
+
+    private func processNextImage() {
+        processingQueue.async {
+            guard !self.incomingBuffer.isEmpty else { return }
+
+            let currentTime = DispatchTime.now()
+            let nextFrame = self.incomingBuffer.removeFirst()
+
+            let timeElapsed = Double(currentTime.uptimeNanoseconds - nextFrame.timestamp.uptimeNanoseconds) / 1_000_000_000
+            if timeElapsed <= self.frameDropThreshold {
+                DispatchQueue.main.async {
+                    self.delegate?.willProcess(image: nextFrame.image)
+                }
             }
-            self.incomingBuffer.append(image)
-            self.delegate?.willProcess(image: image)
+
+            // Check if additional frame needs to be sent
+            self.checkAndSendAdditionalFrame()
         }
     }
 
     func doneProcessing(image: UIImage) {
-        processedQueue.async(flags: .barrier) {
-            if self.processedBuffer.count >= self.maxBufferSize {
-                self.processedBuffer.removeFirst()
-            }
-            self.processedBuffer.append(image)
-            self.sendNextProcessedFrameIfReady()
-        }
-    }
-
-    private func sendNextProcessedFrameIfReady() {
-        let currentTime = DispatchTime.now()
-        let timeSinceLastFrame = Double(currentTime.uptimeNanoseconds - lastFrameTime.uptimeNanoseconds) / 1_000_000_000
-
-        if timeSinceLastFrame >= targetFrameInterval, !processedBuffer.isEmpty {
-            let imageToSend = processedBuffer.removeFirst()
-            lastFrameTime = DispatchTime.now()
-            notifyCurrentFPS()
-            DispatchQueue.main.async {
-                self.delegate?.didReceive(image: imageToSend)
-            }
+        processedFrameCount += 1
+        notifyCurrentFPS()
+        DispatchQueue.main.async {
+            self.delegate?.didReceive(image: image)
         }
     }
 
     private func notifyCurrentFPS() {
         let currentTime = DispatchTime.now()
-        let timeInterval = Double(currentTime.uptimeNanoseconds - lastFrameTimestamp.uptimeNanoseconds) / 1_000_000_000
-        lastFrameTimestamp = currentTime
+        let timeInterval = Double(currentTime.uptimeNanoseconds - lastProcessedTime.uptimeNanoseconds) / 1_000_000_000
 
-        if timeInterval > 0 {
-            let currentFPS = 1.0 / timeInterval
+        print("processFrameCount = \(processedFrameCount)")
+        if timeInterval >= 1.0 { // Calculate FPS every second
+            let currentFPS = Double(processedFrameCount) / timeInterval
+            print(currentFPS)
+            processedFrameCount = 0
+            lastProcessedTime = currentTime
+
             DispatchQueue.main.async {
+                print("\(currentFPS) FPS")
                 self.delegate?.didUpdate(fps: currentFPS)
+            }
+        }
+    }
+
+    private func checkAndSendAdditionalFrame() {
+        // The input FPS is 30% higher than target FPS so we send more frames than what we want to achieve as output
+        let desiredFPS = targetFPS * 1.3
+        let currentTime = DispatchTime.now()
+        let fps = 1.0 / (Double(currentTime.uptimeNanoseconds - lastIncomingTime.uptimeNanoseconds) / 1_000_000_000)
+
+        if fps < desiredFPS, let lastFrame = lastSubmittedFrame {
+            // Resend the last submitted frame
+            DispatchQueue.main.async {
+                self.delegate?.willProcess(image: lastFrame.image)
             }
         }
     }

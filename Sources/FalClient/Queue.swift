@@ -14,11 +14,11 @@ public protocol Queue {
 
 public extension Queue {
     func submit(_ id: String, input: [String: Any]? = nil, webhookUrl: String? = nil) async throws -> String {
-        return try await submit(id, input: input, webhookUrl: webhookUrl)
+        try await submit(id, input: input, webhookUrl: webhookUrl)
     }
 
     func status(_ id: String, of requestId: String, includeLogs: Bool = false) async throws -> QueueStatus {
-        return try await status(id, of: requestId, includeLogs: includeLogs)
+        try await status(id, of: requestId, includeLogs: includeLogs)
     }
 }
 
@@ -47,7 +47,7 @@ public struct QueueClient: Queue {
     }
 
     public func status(_ id: String, of requestId: String, includeLogs: Bool) async throws -> QueueStatus {
-        return try await client.run(
+        try await client.run(
             id,
             input: QueueStatusInput(logs: includeLogs),
             options: .route("/fal/queue/requests/\(requestId)/status", withMethod: .get)
@@ -55,7 +55,7 @@ public struct QueueClient: Queue {
     }
 
     public func response(_ id: String, of requestId: String) async throws -> [String: Any] {
-        return try await client.run(
+        try await client.run(
             id,
             input: nil as ([String: Any])?,
             options: .route("/fal/queue/requests/\(requestId)/response", withMethod: .get)
