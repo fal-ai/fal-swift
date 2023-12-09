@@ -86,7 +86,7 @@ class ImageStreaming {
 
     weak var delegate: ImageStreamingDelegate?
 
-    init(targetFPS: Double = 60.0, frameDropThreshold: Double = 0.1) {
+    init(targetFPS: Double = 40, frameDropThreshold: Double = 0.1) {
         self.targetFPS = targetFPS
         self.frameDropThreshold = frameDropThreshold
     }
@@ -132,16 +132,11 @@ class ImageStreaming {
     private func notifyCurrentFPS() {
         let currentTime = DispatchTime.now()
         let timeInterval = Double(currentTime.uptimeNanoseconds - lastProcessedTime.uptimeNanoseconds) / 1_000_000_000
+        lastProcessedTime = currentTime
 
-        print("processFrameCount = \(processedFrameCount)")
-        if timeInterval >= 1.0 { // Calculate FPS every second
-            let currentFPS = Double(processedFrameCount) / timeInterval
-            print(currentFPS)
-            processedFrameCount = 0
-            lastProcessedTime = currentTime
-
+        if timeInterval > 0 {
+            let currentFPS = 1.0 / timeInterval
             DispatchQueue.main.async {
-                print("\(currentFPS) FPS")
                 self.delegate?.didUpdate(fps: currentFPS)
             }
         }
