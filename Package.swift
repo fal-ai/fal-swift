@@ -20,30 +20,19 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.52.10"),
+        .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.52.10")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
-        .target(name: "FalClient"),
+        .target(
+            name: "FalClient",
+            path: "Sources/FalClient"
+        ),
         .testTarget(
             name: "FalClientTests",
-            dependencies: ["FalClient"]
-        ),
-        .target(
-            name: "FalSampleApp",
             dependencies: ["FalClient"],
-            path: "Sources/Samples/FalSampleApp"
-        ),
-        .target(
-            name: "FalCameraSampleApp",
-            dependencies: ["FalClient"],
-            path: "Sources/Samples/FalCameraSampleApp"
-        ),
-        .target(
-            name: "FalRealtimeSampleApp",
-            dependencies: ["FalClient"],
-            path: "Sources/Samples/FalRealtimeSampleApp"
-        ),
+            path: "Tests/FalClientTests"
+        )
     ]
 )
