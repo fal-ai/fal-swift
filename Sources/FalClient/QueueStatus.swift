@@ -1,3 +1,5 @@
+/// Enum that represents the status of a request in the queue.
+/// This is the base class for the different statuses: [inProgress], [inQueue] and [completed].
 public enum QueueStatus: Codable {
     case inProgress(logs: [RequestLog])
     case inQueue(position: Int, responseUrl: String)
@@ -57,6 +59,7 @@ public enum QueueStatus: Codable {
         }
     }
 
+    /// Whether the request is completed or not.
     public var isCompleted: Bool {
         switch self {
         case .completed:
@@ -66,6 +69,7 @@ public enum QueueStatus: Codable {
         }
     }
 
+    /// Logs related to the request, if any.
     public var logs: [RequestLog] {
         switch self {
         case let .inProgress(logs), let .completed(logs, _):

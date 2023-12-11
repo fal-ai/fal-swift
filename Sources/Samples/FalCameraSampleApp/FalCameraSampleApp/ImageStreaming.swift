@@ -96,14 +96,14 @@ class ImageStreaming {
         let frame = ImageFrame.from(image: image)
         lastSubmittedFrame = frame
 
-        incomingQueue.async(flags: .barrier) {
+        incomingQueue.async {
             self.incomingBuffer.append(frame)
             self.processNextImage()
         }
     }
 
     private func processNextImage() {
-        processingQueue.async {
+        processingQueue.async(flags: .barrier) {
             guard !self.incomingBuffer.isEmpty else { return }
 
             let currentTime = DispatchTime.now()

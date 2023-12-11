@@ -1,14 +1,25 @@
 import Foundation
 
+/// This establishes the contract of the client with the queue API.
 public protocol Queue {
     var client: Client { get }
 
+    /// Submits a request to the given [id], an optional [path]. This method
+    /// uses the [queue] API to initiate the request. Next you need to rely on
+    /// [status] and [result] to poll for the result.
     func submit(_ id: String, input: [String: Any]?, webhookUrl: String?) async throws -> String
 
+    /// Checks the queue for the status of the request with the given [requestId].
+    /// See [QueueStatus] for the different statuses.
     func status(_ id: String, of requestId: String, includeLogs: Bool) async throws -> QueueStatus
 
+    /// Retrieves the result of the request with the given [requestId] once
+    /// the queue status is [QueueStatus.completed].
     func response(_ id: String, of requestId: String) async throws -> [String: Any]
 
+    /// Retrieves the result of the request with the given [requestId] once
+    /// the queue status is [QueueStatus.completed]. This method is type-safe
+    /// based on the [Decodable] protocol.
     func response<T: Decodable>(_ id: String, of requestId: String) async throws -> T
 }
 

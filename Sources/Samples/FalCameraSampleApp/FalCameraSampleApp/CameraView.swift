@@ -26,6 +26,23 @@ func imageFromSampleBuffer(sampleBuffer: CMSampleBuffer) -> UIImage? {
     )
 }
 
+extension UIDeviceOrientation {
+    var videoOrientation: AVCaptureVideoOrientation {
+        switch self {
+        case .unknown, .portrait, .faceUp:
+            return .portrait
+        case .portraitUpsideDown, .faceDown:
+            return .portraitUpsideDown
+        case .landscapeLeft:
+            return .landscapeRight
+        case .landscapeRight:
+            return .landscapeLeft
+        @unknown default:
+            return .portrait
+        }
+    }
+}
+
 protocol CameraFrameDelegate: AnyObject {
     func didCaptureFrame(_ image: UIImage)
 }
@@ -57,17 +74,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     override func willTransition(to _: UITraitCollection, with _: UIViewControllerTransitionCoordinator) {
         viewRect = view.bounds
         previewLayer.frame = CGRect(x: 0, y: 0, width: viewRect.size.width, height: viewRect.size.height)
-
-        switch UIDevice.current.orientation {
-        case UIDeviceOrientation.landscapeLeft:
-            previewLayer.connection?.videoOrientation = .landscapeRight
-
-        case UIDeviceOrientation.landscapeRight:
-            previewLayer.connection?.videoOrientation = .landscapeLeft
-
-        default:
-            break
-        }
+        previewLayer.connection?.videoOrientation = UIDevice.current.orientation.videoOrientation
     }
 
     func captureOutput(_: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from _: AVCaptureConnection) {
@@ -143,7 +150,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             previewLayer.bounds = CGRect(x: 0, y: 0, width: sideLength, height: sideLength)
             previewLayer.position = CGPoint(x: self.view.bounds.midX, y: self.view.bounds.midY)
             previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
-            previewLayer.connection?.videoOrientation = UIDevice.current.orientation == .landscapeRight ? .landscapeLeft : .landscapeRight
+            previewLayer.connection?.videoOrientation = UIDevice.current.orientation.videoOrientation
             self.view.layer.addSublayer(self.previewLayer)
 
             // Crop the preview layer to 512x512

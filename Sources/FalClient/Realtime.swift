@@ -40,6 +40,8 @@ extension FalRealtimeError: LocalizedError {
 typealias SendFunction = (URLSessionWebSocketTask.Message) throws -> Void
 typealias CloseFunction = () -> Void
 
+/// The real-time connection. This is used to send messages to the app, which will send
+/// responses back to the `connect` result completion callback.
 public class RealtimeConnection<Input> {
     var sendReference: SendFunction
     var closeReference: CloseFunction
@@ -49,10 +51,15 @@ public class RealtimeConnection<Input> {
         closeReference = close
     }
 
+    /// Closes the connection. You can use this to manuallt close the connection.
+    /// In most cases you don't need to call this method, as connections are closed
+    /// automatically by the server when they are idle. The idle period is determined
+    /// by the app and it may vary.
     public func close() {
         closeReference()
     }
 
+    /// Sends a message to the app.
     public func send(_: Input) throws {
         preconditionFailure("This method must be overridden to handle \(Input.self)")
     }
@@ -279,6 +286,7 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
 
 var connectionPool: [String: WebSocketConnection] = [:]
 
+/// The real-time client contract.
 public protocol Realtime {
     var client: Client { get }
 
@@ -322,6 +330,7 @@ extension URLSessionWebSocketTask.Message {
     }
 }
 
+/// The real-time client implementation.
 public struct RealtimeClient: Realtime {
     // TODO: in the future make this non-public
     // External APIs should not use it
@@ -403,6 +412,18 @@ extension Realtime {
 }
 
 public extension Realtime {
+    /// Connects to the given `app` and returns a `RealtimeConnection` that can be used to send messages to the app.
+    /// The `connectionKey` is used to identify the connection and it's used to reuse the same connection
+    /// and it's useful in scenarios where the `connect` function is called multiple times.
+    /// The `throttleInterval` is used to throttle the messages sent to the app, it defaults to 64 milliseconds.
+    ///
+    /// - Parameters:
+    ///   - app: The id of the model app.
+    ///   - connectionKey: The connection key.
+    ///   - throttleInterval: The throttle interval.
+    ///   - completion: The completion callback.
+    ///
+    /// - Returns: A `RealtimeConnection` that can be used to send messages to the app.
     func connect(
         to app: String,
         connectionKey: String = UUID().uuidString,
@@ -421,7 +442,7 @@ public extension Realtime {
         to app: String,
         input: [String: Any] = [:],
         connectionKey: String = UUID().uuidString,
-        throttleInterval: DispatchTimeInterval,
+        throttleInterval: DispatchTimeInterval = .milliseconds(64),
         onResult completion: @escaping (Result<Data, Error>) -> Void
     ) throws -> RealtimeConnection<Data> {
         handleConnection(
