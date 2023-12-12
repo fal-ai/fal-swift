@@ -31,27 +31,23 @@ public struct FalClient: Client {
 
     public var realtime: Realtime { RealtimeClient(client: self) }
 
-    public func run(_ app: String, input: ObjectValue?, options: RunOptions) async throws -> ObjectValue {
+    public func run(_ app: String, input: Payload?, options: RunOptions) async throws -> Payload {
         let inputData = input != nil ? try JSONEncoder().encode(input) : nil
         let queryParams = options.httpMethod == .get ? input : nil
         let url = buildUrl(fromId: app, path: options.path)
         let data = try await sendRequest(url, input: inputData, queryParams: queryParams?.asDictionary, options: options)
-//        guard let result = try? JSON(data: data) else {
-//            throw FalError.invalidResultFormat
-//        }
-//        return result
         let decoder = JSONDecoder()
-        return try decoder.decode(ObjectValue.self, from: data)
+        return try decoder.decode(Payload.self, from: data)
     }
 
     public func subscribe(
         to app: String,
-        input: ObjectValue?,
+        input: Payload?,
         pollInterval: DispatchTimeInterval,
         timeout: DispatchTimeInterval,
         includeLogs: Bool,
         onQueueUpdate: OnQueueUpdate?
-    ) async throws -> ObjectValue {
+    ) async throws -> Payload {
         let requestId = try await queue.submit(app, input: input)
         let start = Int(Date().timeIntervalSince1970 * 1000)
         var elapsed = 0

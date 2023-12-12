@@ -45,7 +45,7 @@ typealias SendFunction = (URLSessionWebSocketTask.Message) throws -> Void
 typealias CloseFunction = () -> Void
 
 func hasBinaryField(_ type: Encodable) -> Bool {
-    if let object = type as? ObjectValue,
+    if let object = type as? Payload,
        case let .dict(dict) = object
     {
         return dict.values.contains {
@@ -106,8 +106,10 @@ public class BaseRealtimeConnection<Input: Encodable> {
     }
 }
 
-public class RealtimeConnection: BaseRealtimeConnection<ObjectValue> {}
+/// Connection implementation that can be used to send messages using the `Payload` type.
+public class RealtimeConnection: BaseRealtimeConnection<Payload> {}
 
+/// Connection implementation that can be used to send messages using a custom `Encodable` type.
 public class TypedRealtimeConnection<Input: Encodable>: BaseRealtimeConnection<Input> {}
 
 func buildRealtimeUrl(forApp app: String, host: String, token: String? = nil) -> URL {
@@ -235,7 +237,7 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
                 do {
                     self?.receiveMessage()
 
-                    var object = try message.decode(to: ObjectValue.self)
+                    var object = try message.decode(to: Payload.self)
                     if isSuccessResult(object) {
                         self?.onMessage(message)
                         return
@@ -310,17 +312,17 @@ public protocol Realtime {
         to app: String,
         connectionKey: String,
         throttleInterval: DispatchTimeInterval,
-        onResult completion: @escaping (Result<ObjectValue, Error>) -> Void
+        onResult completion: @escaping (Result<Payload, Error>) -> Void
     ) throws -> RealtimeConnection
 }
 
-func isSuccessResult(_ message: ObjectValue) -> Bool {
+func isSuccessResult(_ message: Payload) -> Bool {
     message["status"].stringValue != "error"
         && message["type"].stringValue != "x-fal-message"
         && message["type"].stringValue != "x-fal-error"
 }
 
-func getError(_ message: ObjectValue) -> FalRealtimeError? {
+func getError(_ message: Payload) -> FalRealtimeError? {
     if message["type"].stringValue != "x-fal-error",
        let error = message["error"].stringValue,
        let reason = message["reason"].stringValue
@@ -345,14 +347,14 @@ extension WebSocketMessage {
         }
     }
 
-    func decode<Type: Decodable>(to _: Type.Type) throws -> Type {
+    func decode<Type: Decodable>(to type: Type.Type) throws -> Type {
         switch self {
         case let .data(data):
-            return try MessagePackDecoder().decode(Type.self, from: data)
+            return try MessagePackDecoder().decode(type, from: data)
         case .string:
-            return try JSONDecoder().decode(Type.self, from: data())
+            return try JSONDecoder().decode(type, from: data())
         @unknown default:
-            return try JSONDecoder().decode(Type.self, from: data())
+            return try JSONDecoder().decode(type, from: data())
         }
     }
 }
@@ -371,7 +373,7 @@ public struct RealtimeClient: Realtime {
         to app: String,
         connectionKey: String,
         throttleInterval: DispatchTimeInterval,
-        onResult completion: @escaping (Result<ObjectValue, Error>) -> Void
+        onResult completion: @escaping (Result<Payload, Error>) -> Void
     ) throws -> RealtimeConnection {
         handleConnection(
             to: app,
@@ -445,7 +447,7 @@ public extension Realtime {
         to app: String,
         connectionKey: String = UUID().uuidString,
         throttleInterval: DispatchTimeInterval = .milliseconds(64),
-        onResult completion: @escaping (Result<ObjectValue, Error>) -> Void
+        onResult completion: @escaping (Result<Payload, Error>) -> Void
     ) throws -> RealtimeConnection {
         try connect(
             to: app,

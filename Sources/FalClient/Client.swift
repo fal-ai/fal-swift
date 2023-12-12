@@ -37,16 +37,16 @@ public protocol Client {
 
     var realtime: Realtime { get }
 
-    func run(_ id: String, input: ObjectValue?, options: RunOptions) async throws -> ObjectValue
+    func run(_ id: String, input: Payload?, options: RunOptions) async throws -> Payload
 
     func subscribe(
         to app: String,
-        input: ObjectValue?,
+        input: Payload?,
         pollInterval: DispatchTimeInterval,
         timeout: DispatchTimeInterval,
         includeLogs: Bool,
         onQueueUpdate: OnQueueUpdate?
-    ) async throws -> ObjectValue
+    ) async throws -> Payload
 }
 
 public extension Client {
@@ -61,7 +61,7 @@ public extension Client {
     ///   - app: The id of the model app.
     ///   - input: The input to the model.
     ///   - options: The request options.
-    func run(_ app: String, input: ObjectValue? = nil, options: RunOptions = DefaultRunOptions) async throws -> ObjectValue {
+    func run(_ app: String, input: Payload? = nil, options: RunOptions = DefaultRunOptions) async throws -> Payload {
         try await run(app, input: input, options: options)
     }
 
@@ -80,12 +80,12 @@ public extension Client {
     ///   - onQueueUpdate: A callback to be called when the queue status is updated.
     func subscribe(
         to app: String,
-        input: ObjectValue? = nil,
+        input: Payload? = nil,
         pollInterval: DispatchTimeInterval = .seconds(1),
         timeout: DispatchTimeInterval = .minutes(3),
         includeLogs: Bool = false,
         onQueueUpdate: OnQueueUpdate? = nil
-    ) async throws -> ObjectValue {
+    ) async throws -> Payload {
         try await subscribe(to: app,
                             input: input,
                             pollInterval: pollInterval,

@@ -13,6 +13,7 @@ class ImageStreamingModel: ObservableObject, ImageStreamingDelegate {
             }
         }
     }
+
     @Published var prompt: String = "photo of george clooney, sharp focus, intricate, elegant, realistic, 8k ultra hd" {
         didSet {
             if let frame = currentCapturedFrame {
@@ -20,6 +21,7 @@ class ImageStreamingModel: ObservableObject, ImageStreamingDelegate {
             }
         }
     }
+
     @Published var currentProcessedFrame: UIImage?
     @Published var currentFPS: Double = 0.0
     @Published var active: Bool = false

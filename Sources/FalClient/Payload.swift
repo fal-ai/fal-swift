@@ -2,19 +2,19 @@ import Foundation
 
 /// Represents a value that can be encoded and decoded. This data structure
 /// is used to represent the input and output of the model API and closely
-/// matches the JSON data structure.
+/// matches a JSON data structure.
 ///
 /// It supports binary data as well, so it can be kept and transformed if needed
 /// before it's encoded to JSON or any other supported format (e.g. msgpack).
-public enum ObjectValue: Codable {
+public enum Payload: Codable {
     case string(String)
     case int(Int)
     case bool(Bool)
     case double(Double)
     case date(Date)
     case data(Data)
-    case array([ObjectValue])
-    case dict([String: ObjectValue])
+    case array([Payload])
+    case dict([String: Payload])
     case nilValue
 
     public init(from decoder: Decoder) throws {
@@ -31,9 +31,9 @@ public enum ObjectValue: Codable {
             self = .date(date)
         } else if let data = try? container.decode(Data.self) {
             self = .data(data)
-        } else if let array = try? container.decode([ObjectValue].self) {
+        } else if let array = try? container.decode([Payload].self) {
             self = .array(array)
-        } else if let dict = try? container.decode([String: ObjectValue].self) {
+        } else if let dict = try? container.decode([String: Payload].self) {
             self = .dict(dict)
         } else {
             self = .nilValue
@@ -72,7 +72,7 @@ public enum ObjectValue: Codable {
 
 // MARK: - Expressible
 
-extension ObjectValue: ExpressibleByStringLiteral {
+extension Payload: ExpressibleByStringLiteral {
     public init(stringLiteral value: StringLiteralType) {
         self = .string(value)
     }
@@ -85,53 +85,53 @@ extension ObjectValue: ExpressibleByStringLiteral {
     }
 }
 
-extension ObjectValue: ExpressibleByIntegerLiteral {
+extension Payload: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: IntegerLiteralType) {
         self = .int(value)
     }
 }
 
-extension ObjectValue: ExpressibleByBooleanLiteral {
+extension Payload: ExpressibleByBooleanLiteral {
     public init(booleanLiteral value: BooleanLiteralType) {
         self = .bool(value)
     }
 }
 
-extension ObjectValue: ExpressibleByNilLiteral {
+extension Payload: ExpressibleByNilLiteral {
     public init(nilLiteral _: ()) {
         self = .nilValue
     }
 }
 
-extension ObjectValue: ExpressibleByFloatLiteral {
+extension Payload: ExpressibleByFloatLiteral {
     public init(floatLiteral value: FloatLiteralType) {
         self = .double(value)
     }
 }
 
-extension ObjectValue: ExpressibleByArrayLiteral {
-    public init(arrayLiteral elements: ObjectValue...) {
+extension Payload: ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: Payload...) {
         self = .array(elements)
     }
 }
 
-extension ObjectValue: ExpressibleByDictionaryLiteral {
-    public init(dictionaryLiteral elements: (String, ObjectValue)...) {
+extension Payload: ExpressibleByDictionaryLiteral {
+    public init(dictionaryLiteral elements: (String, Payload)...) {
         self = .dict(Dictionary(uniqueKeysWithValues: elements))
     }
 }
 
 // MARK: - Subscript
 
-public extension ObjectValue {
-    subscript(key: String) -> ObjectValue {
+public extension Payload {
+    subscript(key: String) -> Payload {
         if case let .dict(dict) = self, let value = dict[key] {
             return value
         }
         return .nilValue
     }
 
-    subscript(index: Int) -> ObjectValue {
+    subscript(index: Int) -> Payload {
         if case let .array(arr) = self, arr.indices.contains(index) {
             return arr[index]
         }
@@ -141,8 +141,8 @@ public extension ObjectValue {
 
 // MARK: - Equatable
 
-extension ObjectValue: Equatable {
-    public static func == (lhs: ObjectValue, rhs: ObjectValue) -> Bool {
+extension Payload: Equatable {
+    public static func == (lhs: Payload, rhs: Payload) -> Bool {
         switch (lhs, rhs) {
         case let (.string(a), .string(b)):
             return a == b
@@ -168,7 +168,7 @@ extension ObjectValue: Equatable {
     }
 
     // Special handling to compare .nilValue with nil
-    static func == (lhs: ObjectValue?, rhs: ObjectValue) -> Bool {
+    static func == (lhs: Payload?, rhs: Payload) -> Bool {
         if let lhs {
             return lhs == rhs
         } else {
@@ -176,14 +176,14 @@ extension ObjectValue: Equatable {
         }
     }
 
-    static func == (lhs: ObjectValue, rhs: ObjectValue?) -> Bool {
+    static func == (lhs: Payload, rhs: Payload?) -> Bool {
         rhs == lhs
     }
 }
 
 // MARK: - Converto to native types
 
-extension ObjectValue {
+extension Payload {
     var nativeValue: Any {
         switch self {
         case let .string(value):

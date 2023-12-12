@@ -10,7 +10,7 @@ struct ContentView: View {
                 .font(.largeTitle)
                 .textFieldStyle(.roundedBorder)
                 .padding()
-            
+
             if sizeClass == .regular {
                 HStack(alignment: .center) {
                     cameraView
