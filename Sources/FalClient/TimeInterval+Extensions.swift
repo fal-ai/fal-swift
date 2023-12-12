@@ -2,7 +2,7 @@ import Dispatch
 
 extension DispatchTimeInterval {
     public static func minutes(_ value: Int) -> DispatchTimeInterval {
-        return .seconds(value * 60)
+        .seconds(value * 60)
     }
 
     var milliseconds: Int {

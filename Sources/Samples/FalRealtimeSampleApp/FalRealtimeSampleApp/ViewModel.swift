@@ -10,7 +10,7 @@ struct LcmInput: Encodable {
     let imageUrl: String
     let seed: Int
     let syncMode: Bool
-    
+
     enum CodingKeys: String, CodingKey {
         case prompt
         case imageUrl = "image_url"
@@ -32,19 +32,20 @@ struct LcmResponse: Decodable {
 class LiveImage: ObservableObject {
     @Published var currentImage: Data?
 
-    // This example demonstrates the support to Codable types
-    // RealtimeConnection<[String: Any]> can also be used
-    // for untyped input / output using dictionaries
-    private var connection: RealtimeConnection<LcmInput>?
+    // This example demonstrates the support to Codable types, but
+    // RealtimeConnection can also be used for untyped input / output
+    // using dictionary-like ObjectValue
+    private var connection: TypedRealtimeConnection<LcmInput>?
 
     init() {
         connection = try? fal.realtime.connect(
             to: OptimizedLatentConsistency,
             connectionKey: "PencilKitDemo",
             throttleInterval: .milliseconds(128)
-        ) { (result: Result<LcmResponse, Error>)  in
+        ) { (result: Result<LcmResponse, Error>) in
             if case let .success(data) = result,
-               let image = data.images.first {
+               let image = data.images.first
+            {
                 let data = try? Data(contentsOf: URL(string: image.url)!)
                 DispatchQueue.main.async {
                     self.currentImage = data
@@ -54,7 +55,7 @@ class LiveImage: ObservableObject {
     }
 
     func generate(prompt: String, drawing: Data) throws {
-        if let connection = connection {
+        if let connection {
             try connection.send(LcmInput(
                 prompt: prompt,
                 imageUrl: "data:image/jpeg;base64,\(drawing.base64EncodedString())",

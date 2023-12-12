@@ -1,8 +1,9 @@
 ## The fal.ai Swift Client
 
-![FalClient Swift package](https://img.shields.io/badge/swift-package-brightgreen)
-![Build](https://img.shields.io/badge/build-passing-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-blue)
+[![Swift](https://img.shields.io/endpoint?style=flat-square&url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Ffal-ai%2Fserverless-client-swift%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/fal-ai/serverless-client-swift)
+[![](https://img.shields.io/endpoint?style=flat-square&url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Ffal-ai%2Fserverless-client-swift%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/fal-ai/serverless-client-swift)
+![Build](https://img.shields.io/github/actions/workflow/status/fal-ai/serverless-client-swift/build.yml?style=flat-square)
+![License](https://img.shields.io/github/license/fal-ai/serverless-client-swift?style=flat-square)
 
 ## About the Project
 

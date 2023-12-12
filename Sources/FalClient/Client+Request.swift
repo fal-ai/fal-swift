@@ -6,7 +6,7 @@ extension Client {
             throw FalError.invalidUrl(url: urlString)
         }
 
-        if let queryParams = queryParams,
+        if let queryParams,
            var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
         {
             urlComponents.queryItems = queryParams.map {
