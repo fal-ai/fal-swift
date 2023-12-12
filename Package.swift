@@ -7,7 +7,7 @@ let package = Package(
     name: "FalClient",
     platforms: [
         .iOS(.v16),
-        .macOS(.v12),
+        .macOS(.v13),
         .macCatalyst(.v16),
         .tvOS(.v16),
         .watchOS(.v9),
