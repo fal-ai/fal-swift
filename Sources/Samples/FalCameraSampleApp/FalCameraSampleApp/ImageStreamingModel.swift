@@ -1,6 +1,10 @@
 import FalClient
 import SwiftUI
 
+let TurboApp = "110602490-sd-turbo-real-time-high-fps-msgpack"
+// let TurboApp = "110602490-sdxl-turbo-realtime-high-fps"
+// let TurboApp = "110602490-sd-turbo-realtime-high-fps"
+
 class ImageStreamingModel: ObservableObject, ImageStreamingDelegate {
     @Published var currentCapturedFrame: UIImage? {
         didSet {
@@ -9,35 +13,36 @@ class ImageStreamingModel: ObservableObject, ImageStreamingDelegate {
             }
         }
     }
-
+    @Published var prompt: String = "photo of george clooney, sharp focus, intricate, elegant, realistic, 8k ultra hd" {
+        didSet {
+            if let frame = currentCapturedFrame {
+                process(image: frame)
+            }
+        }
+    }
     @Published var currentProcessedFrame: UIImage?
     @Published var currentFPS: Double = 0.0
+    @Published var active: Bool = false
 
     private var imageStreaming: ImageStreaming
 
-    private var connection: RealtimeConnection<Data>?
+    private var connection: RealtimeConnection?
 
     init(imageStreaming: ImageStreaming = ImageStreaming()) {
         // simplified error handling for demo purposes
         connection = try? fal.realtime.connect(
-            to: "110602490-sd-turbo-real-time-high-fps",
-//            to: "110602490-sdxl-turbo-realtime-high-fps",
-            input: [
-                "prompt": "photo of george clooney, sharp focus, intricate, elegant, realistic, 8k ultra hd",
-                "num_inference_steps": 3,
-                "strength": 0.44,
-                "guidance_scale": 1,
-                "seed": 224,
-            ],
+            to: TurboApp,
             connectionKey: "swift-realtime-camera-demo",
             throttleInterval: .never
         ) { result in
-            if case let .success(data) = result, let processedImage = UIImage(data: data) {
+            if case let .success(data) = result,
+               case let .data(image) = data["image"],
+               let processedImage = UIImage(data: image)
+            {
                 imageStreaming.doneProcessing(image: processedImage)
             }
             if case let .failure(error) = result {
-                print(type(of: error))
-//                print(error)
+                print(error)
             }
         }
         self.imageStreaming = imageStreaming
@@ -59,13 +64,22 @@ class ImageStreamingModel: ObservableObject, ImageStreamingDelegate {
     }
 
     func willProcess(image: UIImage) {
-        guard let connection, let data = image.resize(to: .square)?.jpegData(compressionQuality: 0.5) else {
+        guard active else {
             return
         }
-        do {
-            try connection.send(data)
-        } catch {
-            print(error)
+        if let connection, let data = image.resize(to: .square)?.jpegData(compressionQuality: 0.5) {
+            do {
+                try connection.send([
+                    "prompt": .string(prompt),
+                    "image": .data(data),
+                    "num_inference_steps": 3,
+                    "strength": 0.44,
+                    "guidance_scale": 1,
+                    "seed": 224,
+                ])
+            } catch {
+                print(error)
+            }
         }
     }
 }

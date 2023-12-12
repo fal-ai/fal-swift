@@ -17,10 +17,13 @@ struct ContentView: View {
                         print("Generate image...")
                         isLoading = true
                         do {
-                            let result = try await fal.subscribe(to: "110602490-fast-sdxl", input: [
-                                "prompt": PROMPT,
-                            ], includeLogs: true) { update in
-                                print(update)
+                            let result = try await fal.subscribe(
+                                to: "110602490-fast-sdxl",
+                                input: [
+                                    "prompt": .string(PROMPT),
+                                ],
+                                includeLogs: true
+                            ) { update in
                                 update.logs
                                     .filter { log in !log.message.isEmpty }
                                     .forEach { log in
@@ -28,8 +31,8 @@ struct ContentView: View {
                                     }
                             }
                             isLoading = false
-                            if let images = result["images"] as? [[String: Any]] {
-                                imageUrl = images[0]["url"] as? String
+                            if case let .string(url) = result["images"][0]["url"] {
+                                imageUrl = url
                             }
                         } catch {
                             print(error)

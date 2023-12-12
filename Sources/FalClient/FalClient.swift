@@ -31,25 +31,27 @@ public struct FalClient: Client {
 
     public var realtime: Realtime { RealtimeClient(client: self) }
 
-    public func run(_ app: String, input: [String: Any]?, options: RunOptions) async throws -> [String: Any] {
-        let inputData = input != nil ? try JSONSerialization.data(withJSONObject: input as Any) : nil
+    public func run(_ app: String, input: ObjectValue?, options: RunOptions) async throws -> ObjectValue {
+        let inputData = input != nil ? try JSONEncoder().encode(input) : nil
         let queryParams = options.httpMethod == .get ? input : nil
         let url = buildUrl(fromId: app, path: options.path)
-        let data = try await sendRequest(url, input: inputData, queryParams: queryParams, options: options)
-        guard let result = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw FalError.invalidResultFormat
-        }
-        return result
+        let data = try await sendRequest(url, input: inputData, queryParams: queryParams?.asDictionary, options: options)
+//        guard let result = try? JSON(data: data) else {
+//            throw FalError.invalidResultFormat
+//        }
+//        return result
+        let decoder = JSONDecoder()
+        return try decoder.decode(ObjectValue.self, from: data)
     }
 
     public func subscribe(
         to app: String,
-        input: [String: Any]?,
+        input: ObjectValue?,
         pollInterval: DispatchTimeInterval,
         timeout: DispatchTimeInterval,
         includeLogs: Bool,
         onQueueUpdate: OnQueueUpdate?
-    ) async throws -> [String: Any] {
+    ) async throws -> ObjectValue {
         let requestId = try await queue.submit(app, input: input)
         let start = Int(Date().timeIntervalSince1970 * 1000)
         var elapsed = 0

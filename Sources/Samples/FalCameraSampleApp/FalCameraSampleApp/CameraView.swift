@@ -22,7 +22,7 @@ func imageFromSampleBuffer(sampleBuffer: CMSampleBuffer) -> UIImage? {
     return UIImage(
         cgImage: croppedCGImage,
         scale: scale,
-        orientation: .down
+        orientation: .up
     )
 }
 

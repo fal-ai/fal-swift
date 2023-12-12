@@ -12,7 +12,6 @@
 		3443888B2B2014E800C75EA1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3443888A2B2014E800C75EA1 /* Assets.xcassets */; };
 		3443888F2B2014E800C75EA1 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3443888E2B2014E800C75EA1 /* Preview Assets.xcassets */; };
 		344388962B201CA900C75EA1 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 344388952B201CA900C75EA1 /* CameraView.swift */; };
-		344388982B201F1900C75EA1 /* FrameProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 344388972B201F1900C75EA1 /* FrameProcessor.swift */; };
 		34A010BC2B209079007E007F /* fal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34A010BB2B209079007E007F /* fal.swift */; };
 		34A010BF2B209099007E007F /* FalClient in Frameworks */ = {isa = PBXBuildFile; productRef = 34A010BE2B209099007E007F /* FalClient */; };
 		34A010C32B21973D007E007F /* ImageStreaming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34A010C22B21973D007E007F /* ImageStreaming.swift */; };
@@ -27,7 +26,6 @@
 		3443888C2B2014E800C75EA1 /* FalCameraSampleApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FalCameraSampleApp.entitlements; sourceTree = "<group>"; };
 		3443888E2B2014E800C75EA1 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		344388952B201CA900C75EA1 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
-		344388972B201F1900C75EA1 /* FrameProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameProcessor.swift; sourceTree = "<group>"; };
 		344388992B2023CA00C75EA1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		34A010BB2B209079007E007F /* fal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = fal.swift; sourceTree = "<group>"; };
 		34A010C22B21973D007E007F /* ImageStreaming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStreaming.swift; sourceTree = "<group>"; };
@@ -71,7 +69,6 @@
 				34A010BB2B209079007E007F /* fal.swift */,
 				3443888C2B2014E800C75EA1 /* FalCameraSampleApp.entitlements */,
 				344388862B2014E700C75EA1 /* FalCameraSampleAppApp.swift */,
-				344388972B201F1900C75EA1 /* FrameProcessor.swift */,
 				34A010C22B21973D007E007F /* ImageStreaming.swift */,
 				34A010C42B219FE5007E007F /* ImageStreamingModel.swift */,
 				344388992B2023CA00C75EA1 /* Info.plist */,
@@ -169,7 +166,6 @@
 				34A010C52B219FE5007E007F /* ImageStreamingModel.swift in Sources */,
 				344388962B201CA900C75EA1 /* CameraView.swift in Sources */,
 				344388892B2014E700C75EA1 /* ContentView.swift in Sources */,
-				344388982B201F1900C75EA1 /* FrameProcessor.swift in Sources */,
 				344388872B2014E700C75EA1 /* FalCameraSampleAppApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -314,7 +310,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
@@ -354,7 +350,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;

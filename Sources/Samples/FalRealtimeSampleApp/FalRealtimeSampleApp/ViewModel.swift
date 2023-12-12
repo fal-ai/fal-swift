@@ -32,10 +32,10 @@ struct LcmResponse: Decodable {
 class LiveImage: ObservableObject {
     @Published var currentImage: Data?
 
-    // This example demonstrates the support to Codable types
-    // RealtimeConnection<[String: Any]> can also be used
-    // for untyped input / output using dictionaries
-    private var connection: RealtimeConnection<LcmInput>?
+    // This example demonstrates the support to Codable types, but
+    // RealtimeConnection can also be used for untyped input / output
+    // using dictionary-like ObjectValue
+    private var connection: TypedRealtimeConnection<LcmInput>?
 
     init() {
         connection = try? fal.realtime.connect(

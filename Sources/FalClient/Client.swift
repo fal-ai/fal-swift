@@ -37,16 +37,16 @@ public protocol Client {
 
     var realtime: Realtime { get }
 
-    func run(_ id: String, input: [String: Any]?, options: RunOptions) async throws -> [String: Any]
+    func run(_ id: String, input: ObjectValue?, options: RunOptions) async throws -> ObjectValue
 
     func subscribe(
         to app: String,
-        input: [String: Any]?,
+        input: ObjectValue?,
         pollInterval: DispatchTimeInterval,
         timeout: DispatchTimeInterval,
         includeLogs: Bool,
         onQueueUpdate: OnQueueUpdate?
-    ) async throws -> [String: Any]
+    ) async throws -> ObjectValue
 }
 
 public extension Client {
@@ -61,7 +61,7 @@ public extension Client {
     ///   - app: The id of the model app.
     ///   - input: The input to the model.
     ///   - options: The request options.
-    func run(_ app: String, input: [String: Any]? = nil, options: RunOptions = DefaultRunOptions) async throws -> [String: Any] {
+    func run(_ app: String, input: ObjectValue? = nil, options: RunOptions = DefaultRunOptions) async throws -> ObjectValue {
         try await run(app, input: input, options: options)
     }
 
@@ -80,12 +80,12 @@ public extension Client {
     ///   - onQueueUpdate: A callback to be called when the queue status is updated.
     func subscribe(
         to app: String,
-        input: [String: Any]? = nil,
+        input: ObjectValue? = nil,
         pollInterval: DispatchTimeInterval = .seconds(1),
         timeout: DispatchTimeInterval = .minutes(3),
         includeLogs: Bool = false,
         onQueueUpdate: OnQueueUpdate? = nil
-    ) async throws -> [String: Any] {
+    ) async throws -> ObjectValue {
         try await subscribe(to: app,
                             input: input,
                             pollInterval: pollInterval,

@@ -8,6 +8,15 @@
         "revision" : "277f1ab2c6664b19b4a412e32b094b201e2d5757",
         "version" : "7.10.0"
       }
+    },
+    {
+      "identity" : "swift-msgpack",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nnabeyang/swift-msgpack.git",
+      "state" : {
+        "revision" : "65cd65da19270953b72767a71fb1c1d99ea26340",
+        "version" : "0.2.8"
+      }
     }
   ],
   "version" : 2
