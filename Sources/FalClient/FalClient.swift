@@ -31,13 +31,21 @@ public struct FalClient: Client {
 
     public var realtime: Realtime { RealtimeClient(client: self) }
 
+    public var storage: Storage { StorageClient(client: self) }
+
     public func run(_ app: String, input: Payload?, options: RunOptions) async throws -> Payload {
-        let inputData = input != nil ? try JSONEncoder().encode(input) : nil
+        var requestInput = input
+        if let storage = storage as? StorageClient,
+           let input,
+           options.httpMethod != .get,
+           input.hasBinaryData
+        {
+            requestInput = try await storage.autoUpload(input: input)
+        }
         let queryParams = options.httpMethod == .get ? input : nil
         let url = buildUrl(fromId: app, path: options.path)
-        let data = try await sendRequest(url, input: inputData, queryParams: queryParams?.asDictionary, options: options)
-        let decoder = JSONDecoder()
-        return try decoder.decode(Payload.self, from: data)
+        let data = try await sendRequest(to: url, input: requestInput?.json(), queryParams: queryParams?.asDictionary, options: options)
+        return try .create(fromJSON: data)
     }
 
     public func subscribe(

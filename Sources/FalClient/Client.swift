@@ -37,6 +37,8 @@ public protocol Client {
 
     var realtime: Realtime { get }
 
+    var storage: Storage { get }
+
     func run(_ id: String, input: Payload?, options: RunOptions) async throws -> Payload
 
     func subscribe(

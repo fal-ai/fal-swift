@@ -1,7 +1,7 @@
 import Foundation
 
 extension Client {
-    func sendRequest(_ urlString: String, input: Data?, queryParams: [String: Any]? = nil, options: RunOptions) async throws -> Data {
+    func sendRequest(to urlString: String, input: Data?, queryParams: [String: Any]? = nil, options: RunOptions) async throws -> Data {
         guard var url = URL(string: urlString) else {
             throw FalError.invalidUrl(url: urlString)
         }

@@ -1,4 +1,5 @@
 import Foundation
+import MessagePack
 
 /// Represents a value that can be encoded and decoded. This data structure
 /// is used to represent the input and output of the model API and closely
@@ -125,17 +126,33 @@ extension Payload: ExpressibleByDictionaryLiteral {
 
 public extension Payload {
     subscript(key: String) -> Payload {
-        if case let .dict(dict) = self, let value = dict[key] {
-            return value
+        get {
+            if case let .dict(dict) = self, let value = dict[key] {
+                return value
+            }
+            return .nilValue
         }
-        return .nilValue
+        set(newValue) {
+            if case var .dict(dict) = self {
+                dict[key] = newValue
+                self = .dict(dict)
+            }
+        }
     }
 
     subscript(index: Int) -> Payload {
-        if case let .array(arr) = self, arr.indices.contains(index) {
-            return arr[index]
+        get {
+            if case let .array(arr) = self, arr.indices.contains(index) {
+                return arr[index]
+            }
+            return .nilValue
         }
-        return .nilValue
+        set(newValue) {
+            if case var .array(arr) = self {
+                arr[index] = newValue
+                self = .array(arr)
+            }
+        }
     }
 }
 
@@ -181,7 +198,7 @@ extension Payload: Equatable {
     }
 }
 
-// MARK: - Converto to native types
+// MARK: - Convert to native types
 
 extension Payload {
     var nativeValue: Any {
@@ -212,5 +229,42 @@ extension Payload {
             return nil
         }
         return value.mapValues { $0.nativeValue }
+    }
+}
+
+// MARK: - Codable utilities
+
+public extension Payload {
+    static func create(fromJSON data: Data) throws -> Payload {
+        try JSONDecoder().decode(Payload.self, from: data)
+    }
+
+    static func create(fromBinary data: Data) throws -> Payload {
+        try MessagePackDecoder().decode(Payload.self, from: data)
+    }
+
+    func json() throws -> Data {
+        try JSONEncoder().encode(self)
+    }
+
+    func binary() throws -> Data {
+        try MessagePackEncoder().encode(self)
+    }
+}
+
+// MARK: - Utilities
+
+extension Payload {
+    var hasBinaryData: Bool {
+        switch self {
+        case .data:
+            return true
+        case let .array(array):
+            return array.contains { $0.hasBinaryData }
+        case let .dict(dict):
+            return dict.values.contains { $0.hasBinaryData }
+        default:
+            return false
+        }
     }
 }
