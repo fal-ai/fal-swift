@@ -51,6 +51,9 @@ class LiveImage: ObservableObject {
                     self.currentImage = data
                 }
             }
+            if case let .failure(error) = result {
+                print(error)
+            }
         }
     }
 

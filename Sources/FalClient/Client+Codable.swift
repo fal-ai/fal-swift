@@ -25,11 +25,11 @@ public extension Client {
     ) async throws -> Output {
         let inputData = input is EmptyInput ? nil : try encoder.encode(input)
         let queryParams = inputData != nil && options.httpMethod == .get
-            ? try JSONSerialization.jsonObject(with: inputData!) as? [String: Any]
-            : nil
+            ? try Payload.create(fromJSON: inputData!)
+            : Payload.dict([:])
 
         let url = buildUrl(fromId: app, path: options.path)
-        let data = try await sendRequest(url, input: inputData, queryParams: queryParams, options: options)
+        let data = try await sendRequest(to: url, input: inputData, queryParams: queryParams.asDictionary, options: options)
         return try decoder.decode(Output.self, from: data)
     }
 

@@ -1,7 +1,15 @@
 import Foundation
 
+extension HTTPURLResponse {
+    /// Returns `true` if `statusCode` is in range 200...299.
+    /// Otherwise `false`.
+    var isSuccessful: Bool {
+        200 ... 299 ~= statusCode
+    }
+}
+
 extension Client {
-    func sendRequest(_ urlString: String, input: Data?, queryParams: [String: Any]? = nil, options: RunOptions) async throws -> Data {
+    func sendRequest(to urlString: String, input: Data?, queryParams: [String: Any]? = nil, options: RunOptions) async throws -> Data {
         guard var url = URL(string: urlString) else {
             throw FalError.invalidUrl(url: urlString)
         }
@@ -42,8 +50,27 @@ extension Client {
         if input != nil, options.httpMethod != .get {
             request.httpBody = input
         }
-        let (data, _) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        try checkResponseStatus(for: response, withData: data)
         return data
+    }
+
+    func checkResponseStatus(for response: URLResponse, withData data: Data) throws {
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw FalError.invalidResultFormat
+        }
+        if let httpResponse = response as? HTTPURLResponse, !httpResponse.isSuccessful {
+            let errorPayload = try? Payload.create(fromJSON: data)
+            let statusCode = httpResponse.statusCode
+            let message = errorPayload?["detail"].stringValue
+                ?? errorPayload?.stringValue
+                ?? HTTPURLResponse.localizedString(forStatusCode: statusCode)
+            throw FalError.httpError(
+                status: statusCode,
+                message: message,
+                payload: errorPayload
+            )
+        }
     }
 
     var userAgent: String {

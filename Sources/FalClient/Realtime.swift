@@ -17,7 +17,7 @@ func throttle<T>(_ function: @escaping (T) -> Void, throttleInterval: DispatchTi
 }
 
 public enum FalRealtimeError: Error {
-    case connectionError
+    case connectionError(code: Int? = nil)
     case unauthorized
     case invalidInput
     case invalidResult
@@ -27,8 +27,8 @@ public enum FalRealtimeError: Error {
 extension FalRealtimeError: LocalizedError {
     public var errorDescription: String? {
         switch self {
-        case .connectionError:
-            return NSLocalizedString("Connection error", comment: "FalRealtimeError.connectionError")
+        case let .connectionError(code):
+            return NSLocalizedString("Connection error (code: \(String(describing: code)))", comment: "FalRealtimeError.connectionError")
         case .unauthorized:
             return NSLocalizedString("Unauthorized", comment: "FalRealtimeError.unauthorized")
         case .invalidInput:
@@ -209,14 +209,14 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
             // TODO: improve app alias resolution
             let appAlias = app.split(separator: "-").dropFirst().joined(separator: "-")
             let url = "https://rest.alpha.fal.ai/tokens/"
-            let body = try? JSONSerialization.data(withJSONObject: [
-                "allowed_apps": [appAlias],
+            let body: Payload = [
+                "allowed_apps": [.string(appAlias)],
                 "token_expiration": 300,
-            ])
+            ]
             do {
                 let response = try await self.client.sendRequest(
-                    url,
-                    input: body,
+                    to: url,
+                    input: body.json(),
                     options: .withMethod(.post)
                 )
                 if let token = String(data: response, encoding: .utf8) {
@@ -250,8 +250,15 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
                     self?.onError(error)
                 }
             case let .failure(error):
-                self?.onError(error)
                 self?.task = nil
+                if let posixError = error as? POSIXError, posixError.code == .ENOTCONN {
+                    // Ignore this error as it's thrown by Foundation's WebSocket implementation
+                    // when messages were requested but the connection was closed already.
+                    // This is safe to ignore, as the client is not expecting any other messages
+                    // and will reconnect when new messages are sent.
+                    return
+                }
+                self?.onError(error)
             }
         }
     }
@@ -275,6 +282,7 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
 
     func close() {
         task?.cancel(with: .normalClosure, reason: "Programmatically closed".data(using: .utf8))
+        task = nil
     }
 
     func urlSession(
@@ -295,9 +303,12 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
     func urlSession(
         _: URLSession,
         webSocketTask _: URLSessionWebSocketTask,
-        didCloseWith _: URLSessionWebSocketTask.CloseCode,
+        didCloseWith code: URLSessionWebSocketTask.CloseCode,
         reason _: Data?
     ) {
+        if code != .normalClosure {
+            onError(FalRealtimeError.connectionError(code: code.rawValue))
+        }
         task = nil
     }
 }
@@ -323,7 +334,7 @@ func isSuccessResult(_ message: Payload) -> Bool {
 }
 
 func getError(_ message: Payload) -> FalRealtimeError? {
-    if message["type"].stringValue != "x-fal-error",
+    if message["type"].stringValue == "x-fal-error",
        let error = message["error"].stringValue,
        let reason = message["reason"].stringValue
     {
