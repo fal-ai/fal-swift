@@ -34,9 +34,15 @@ public enum FileType {
     }
 }
 
+/// This establishes the contract of the client with the storage API. The storage API is used
+/// to upload files to the fal.ai storage so model APIs can access the files when needed.
+///
+/// This allows for a decoupled architecture where the model API does not need to worry about
+/// file handling and can always rely on a valid URL to read files from.
 public protocol Storage {
     var client: Client { get }
 
+    /// Uploads the given `data` to the fal.ai storage and returns the URL of the uploaded file.
     func upload(data: Data, ofType type: FileType) async throws -> String
 }
 
