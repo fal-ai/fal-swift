@@ -27,6 +27,9 @@ public enum FileType {
         guard case let .custom(type) = self else {
             return "bin"
         }
+        if type == FileType.applicationStream.mimeType {
+            return "bin"
+        }
         return String(type.split(separator: "/").last ?? "bin")
     }
 }
@@ -87,7 +90,7 @@ struct StorageClient: Storage {
             "file_name": .string("\(UUID().uuidString).\(type.fileExtension)"),
         ]
         let response = try await client.sendRequest(
-            to: "https://rest.alpha.fal.ai/storate/upload/initiate",
+            to: "https://rest.alpha.fal.ai/storage/upload/initiate",
             input: input.json(),
             options: .withMethod(.post)
         )
@@ -105,12 +108,9 @@ struct StorageClient: Storage {
         request.httpBody = data
         request.setValue(type.mimeType, forHTTPHeaderField: "Content-Type")
         request.setValue(String(data.count), forHTTPHeaderField: "Content-Length")
-        let (_, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode != 200
-        else {
-            throw FalError.invalidResultFormat
-        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        try client.checkResponseStatus(for: response, withData: data)
 
         return uploadUrl.fileUrl
     }
