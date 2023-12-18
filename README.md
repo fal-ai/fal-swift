@@ -1,9 +1,9 @@
 ## The fal.ai Swift Client
 
-[![Swift](https://img.shields.io/endpoint?style=flat-square&url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Ffal-ai%2Fserverless-client-swift%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/fal-ai/serverless-client-swift)
-[![](https://img.shields.io/endpoint?style=flat-square&url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Ffal-ai%2Fserverless-client-swift%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/fal-ai/serverless-client-swift)
-![Build](https://img.shields.io/github/actions/workflow/status/fal-ai/serverless-client-swift/build.yml?style=flat-square)
-![License](https://img.shields.io/github/license/fal-ai/serverless-client-swift?style=flat-square)
+[![Swift](https://img.shields.io/endpoint?style=flat-square&url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Ffal-ai%2Ffal-swift%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/fal-ai/fal-swift)
+[![](https://img.shields.io/endpoint?style=flat-square&url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Ffal-ai%2Ffal-swift%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/fal-ai/fal-swift)
+![Build](https://img.shields.io/github/actions/workflow/status/fal-ai/fal-swift/build.yml?style=flat-square)
+![License](https://img.shields.io/github/license/fal-ai/fal-swift?style=flat-square)
 
 ## About the Project
 
@@ -23,6 +23,7 @@ This Swift client library is crafted as a lightweight layer atop Swift's network
 1. Add `FalClient` as a dependency in your Swift Package Manager.
 
 2. Set up the client instance:
+
    ```swift
    import FalClient
    let fal = FalClient.withCredentials(.keyPair("FAL_KEY_ID:FAL_KEY_SECRET"))
@@ -50,7 +51,7 @@ This Swift client library is crafted as a lightweight layer atop Swift's network
 - The result type in Swift will be a `[String: Any]` and the entries depend on the API output schema.
 - The Swift client also supports typed inputs and outputs through `Codable`.
 
-## Real-time 
+## Real-time
 
 The client supports real-time model APIs. Checkout the [FalRealtimeSampleApp](./Sources/Samples/FalRealtimeSampleApp/) for more details.
 
@@ -81,7 +82,7 @@ try connection.send(LcmInput(
 
 Check the `Sources/Samples` folder for a handful of sample applications using the `FalClient`.
 
-Open them with `xed` to quickly start playing with 
+Open them with `xed` to quickly start playing with
 
 ```bash
 xed Sources/Samples/FalSampleApp
@@ -89,7 +90,7 @@ xed Sources/Samples/FalSampleApp
 
 ## Roadmap
 
-See the [open feature requests](https://github.com/fal-ai/serverless-client-swift/labels/enhancement) for a list of proposed features and join the discussion.
+See the [open feature requests](https://github.com/fal-ai/fal-swift/labels/enhancement) for a list of proposed features and join the discussion.
 
 ## Contributing
 
@@ -97,4 +98,4 @@ Contributions are what make the open source community such an amazing place to l
 
 ## License
 
-Distributed under the MIT License. See [LICENSE](https://github.com/fal-ai/serverless-client-swift/blob/main/LICENSE) for more information.
+Distributed under the MIT License. See [LICENSE](https://github.com/fal-ai/fal-swift/blob/main/LICENSE) for more information.
