@@ -11,7 +11,7 @@ jobs:
     name: Build
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: macos-latest
         swift: ["5.7", "5.8", "5.9"]
     runs-on: macos-latest
     steps:
