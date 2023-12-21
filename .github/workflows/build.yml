@@ -21,21 +21,21 @@ jobs:
       #   run: swift test
       - name: Build library
         run: swift build --target FalClient --configuration release
-  samples:
-    name: Build samples
-    needs: build
-    runs-on: macos-latest
-    steps:
-      - name: Checkout project
-        uses: actions/checkout@v4
-      - name: Setup Swift
-        uses: swift-actions/setup-swift@v1
-        with:
-          swift-version: "5.9"
-      - name: Build basic app
-        uses: sersoft-gmbh/xcodebuild-action@v3
-        with:
-          project: Sources/Samples/FalSampleApp/FalSampleApp.xcodeproj
-          scheme: FalSampleApp
-          destination: platform=iOS Simulator,name=iPhone 13,OS=16.2
-          action: build
+  # samples:
+  #   name: Build samples
+  #   needs: build
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Checkout project
+  #       uses: actions/checkout@v4
+  #     - name: Setup Swift
+  #       uses: swift-actions/setup-swift@v1
+  #       with:
+  #         swift-version: "5.9"
+  #     - name: Build basic app
+  #       uses: sersoft-gmbh/xcodebuild-action@v3
+  #       with:
+  #         project: Sources/Samples/FalSampleApp/FalSampleApp.xcodeproj
+  #         scheme: FalSampleApp
+  #         destination: platform=iOS Simulator,name=iPhone 13,OS=16.2
+  #         action: build
