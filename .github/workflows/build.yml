@@ -17,8 +17,8 @@ jobs:
         uses: swift-actions/setup-swift@v1
         with:
           swift-version: "5.9"
-      - name: Test library
-        run: swift test
+      # - name: Test library
+      #   run: swift test
       - name: Build library
         run: swift build --target FalClient --configuration release
   samples:

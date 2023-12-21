@@ -13,7 +13,6 @@ let package = Package(
         .watchOS(.v8),
     ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "FalClient",
             targets: ["FalClient"]
@@ -23,11 +22,8 @@ let package = Package(
         .package(url: "https://github.com/nnabeyang/swift-msgpack.git", from: "0.3.0"),
         .package(url: "https://github.com/Quick/Quick.git", from: "7.3.0"),
         .package(url: "https://github.com/Quick/Nimble.git", from: "13.0.0"),
-        .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.52.10"),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "FalClient",
             dependencies: [
