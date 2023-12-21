@@ -112,11 +112,11 @@ public class RealtimeConnection: BaseRealtimeConnection<Payload> {}
 /// Connection implementation that can be used to send messages using a custom `Encodable` type.
 public class TypedRealtimeConnection<Input: Encodable>: BaseRealtimeConnection<Input> {}
 
-func buildRealtimeUrl(forApp app: String, host: String, token: String? = nil) -> URL {
-    var components = URLComponents()
+func buildRealtimeUrl(forApp app: String, token: String? = nil) -> URL {
+    guard var components = URLComponents(string: buildUrl(fromId: app, path: "/ws")) else {
+        preconditionFailure("Invalid URL. This is unexpected and likely a problem in the client library.")
+    }
     components.scheme = "wss"
-    components.host = "\(app).\(host)"
-    components.path = "/ws"
 
     if let token {
         components.queryItems = [URLQueryItem(name: "fal_jwt_token", value: token)]
