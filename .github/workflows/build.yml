@@ -8,15 +8,37 @@ on:
 
 jobs:
   build:
+    name: Build
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        swift: ["5.7", "5.8", "5.9"]
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: swift-actions/setup-swift@v1
+      - name: Checkout project
+        uses: actions/checkout@v4
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v1
+        with:
+          swift-version: ${{ matrix.swift }}
+      - name: Test library
+        run: swift test
+      - name: Build library
+        run: swift build --target FalClient --configuration release
+  samples:
+    name: Build samples
+    needs: build
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v1
         with:
           swift-version: "5.9"
-      - name: Check format
-        run: swift package plugin --allow-writing-to-package-directory swiftformat .
-      - name: Build Library
-        run: swift build --target FalClient --configuration release
-    # - name: Build Sample App
-    #   run: xcodebuild -project Sources/FalSampleApp/FalSampleApp.xcodeproj -scheme FalSampleApp
+      - name: Build basic app
+        uses: sersoft-gmbh/xcodebuild-action@v3
+        with:
+          project: Sources/Samples/FalSampleApp/FalSampleApp.xcodeproj
+          scheme: FalSampleApp
+          destination: platform=iOS Simulator,name=iPhone 13,OS=15.6
+          action: build

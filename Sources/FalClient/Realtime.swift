@@ -235,7 +235,7 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
                 do {
                     self?.receiveMessage()
 
-                    var object = try message.decode(to: Payload.self)
+                    let object = try message.decode(to: Payload.self)
                     if isSuccessResult(object) {
                         self?.onMessage(message)
                         return

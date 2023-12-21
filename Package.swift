@@ -20,8 +20,10 @@ let package = Package(
         ),
     ],
     dependencies: [
+        .package(url: "https://github.com/nnabeyang/swift-msgpack.git", from: "0.3.0"),
+        .package(url: "https://github.com/Quick/Quick.git", from: "7.3.0"),
+        .package(url: "https://github.com/Quick/Nimble.git", from: "13.0.0"),
         .package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.52.10"),
-        .package(url: "https://github.com/nnabeyang/swift-msgpack.git", from: "0.3.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -29,14 +31,18 @@ let package = Package(
         .target(
             name: "FalClient",
             dependencies: [
-                .product(name: "SwiftMsgpack", package: "swift-msgpack")
+                .product(name: "SwiftMsgpack", package: "swift-msgpack"),
             ],
             path: "Sources/FalClient"
         ),
         .testTarget(
             name: "FalClientTests",
-            dependencies: ["FalClient"],
+            dependencies: [
+                "FalClient",
+                .product(name: "Quick", package: "quick"),
+                .product(name: "Nimble", package: "nimble"),
+            ],
             path: "Tests/FalClientTests"
-        )
+        ),
     ]
 )
