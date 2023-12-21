@@ -28,6 +28,7 @@ jobs:
   samples:
     name: Build samples
     needs: build
+    runs-on: macos-latest
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
