@@ -1,5 +1,5 @@
 import Foundation
-import MessagePack
+import SwiftMsgpack
 
 /// Represents a value that can be encoded and decoded. This data structure
 /// is used to represent the input and output of the model API and closely
@@ -240,7 +240,7 @@ public extension Payload {
     }
 
     static func create(fromBinary data: Data) throws -> Payload {
-        try MessagePackDecoder().decode(Payload.self, from: data)
+        try MsgPackDecoder().decode(Payload.self, from: data)
     }
 
     func json() throws -> Data {
@@ -248,7 +248,7 @@ public extension Payload {
     }
 
     func binary() throws -> Data {
-        try MessagePackEncoder().encode(self)
+        try MsgPackEncoder().encode(self)
     }
 }
 

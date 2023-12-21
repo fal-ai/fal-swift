@@ -1,7 +1,7 @@
 import FalClient
 import SwiftUI
 
-let TurboApp = "110602490-sd-turbo-real-time-high-fps-msgpack"
+let TurboApp = "110602490-sd-turbo-real-time-high-fps-msgpack-a10g"
 // let TurboApp = "110602490-sdxl-turbo-realtime-high-fps"
 // let TurboApp = "110602490-sd-turbo-realtime-high-fps"
 

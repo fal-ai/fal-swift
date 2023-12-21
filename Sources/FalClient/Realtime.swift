@@ -1,7 +1,7 @@
 
 import Dispatch
 import Foundation
-import MessagePack
+import SwiftMsgpack
 
 func throttle<T>(_ function: @escaping (T) -> Void, throttleInterval: DispatchTimeInterval) -> ((T) -> Void) {
     var lastExecution = DispatchTime.now()
@@ -101,7 +101,7 @@ public class BaseRealtimeConnection<Input: Encodable> {
     }
 
     func sendBinary(_ data: Input) throws {
-        let payload = try MessagePackEncoder().encode(data)
+        let payload = try MsgPackEncoder().encode(data)
         try sendReference(.data(payload))
     }
 }
@@ -188,10 +188,8 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
                 return
             }
 
-            // TODO: get host from config
             let url = buildRealtimeUrl(
                 forApp: app,
-                host: "gateway.alpha.fal.ai",
                 token: token
             )
             let webSocketTask = session.webSocketTask(with: url)
@@ -361,7 +359,7 @@ extension WebSocketMessage {
     func decode<Type: Decodable>(to type: Type.Type) throws -> Type {
         switch self {
         case let .data(data):
-            return try MessagePackDecoder().decode(type, from: data)
+            return try MsgPackDecoder().decode(type, from: data)
         case .string:
             return try JSONDecoder().decode(type, from: data())
         @unknown default:
