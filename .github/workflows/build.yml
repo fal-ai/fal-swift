@@ -37,5 +37,5 @@ jobs:
         with:
           project: Sources/Samples/FalSampleApp/FalSampleApp.xcodeproj
           scheme: FalSampleApp
-          destination: platform=iOS Simulator,name=iPhone 13,OS=15.6
+          destination: platform=iOS Simulator,name=iPhone 13,OS=16.2
           action: build
