@@ -9,10 +9,6 @@ on:
 jobs:
   build:
     name: Build
-    strategy:
-      matrix:
-        os: macos-latest
-        swift: ["5.7", "5.8", "5.9"]
     runs-on: macos-latest
     steps:
       - name: Checkout project
@@ -20,7 +16,7 @@ jobs:
       - name: Setup Swift
         uses: swift-actions/setup-swift@v1
         with:
-          swift-version: ${{ matrix.swift }}
+          swift-version: "5.9"
       - name: Test library
         run: swift test
       - name: Build library
