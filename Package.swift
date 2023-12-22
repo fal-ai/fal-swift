@@ -19,7 +19,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/nnabeyang/swift-msgpack.git", from: "0.3.0"),
+        .package(url: "https://github.com/nnabeyang/swift-msgpack.git", from: "0.3.1"),
         .package(url: "https://github.com/Quick/Quick.git", from: "7.3.0"),
         .package(url: "https://github.com/Quick/Nimble.git", from: "13.0.0"),
     ],
