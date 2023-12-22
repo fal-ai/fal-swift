@@ -56,7 +56,7 @@ extension Client {
     }
 
     func checkResponseStatus(for response: URLResponse, withData data: Data) throws {
-        guard let httpResponse = response as? HTTPURLResponse else {
+        guard response is HTTPURLResponse else {
             throw FalError.invalidResultFormat
         }
         if let httpResponse = response as? HTTPURLResponse, !httpResponse.isSuccessful {

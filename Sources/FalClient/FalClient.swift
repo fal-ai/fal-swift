@@ -1,10 +1,6 @@
 import Dispatch
 import Foundation
 
-func buildUrl(fromId id: String, path: String? = nil) -> String {
-    "https://\(id).gateway.alpha.fal.ai" + (path ?? "")
-}
-
 /// The main client class that provides access to simple API model usage,
 /// as well as access to the `queue` and `storage` APIs.
 ///
