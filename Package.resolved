@@ -1,21 +1,48 @@
 {
   "pins" : [
     {
-      "identity" : "msgpack-swift",
+      "identity" : "cwlcatchexception",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/fumoboy007/msgpack-swift.git",
+      "location" : "https://github.com/mattgallagher/CwlCatchException.git",
       "state" : {
-        "revision" : "1e3124367973f45955f27f49a617862605e55288",
-        "version" : "2.0.0"
+        "revision" : "3b123999de19bf04905bc1dfdb76f817b0f2cc00",
+        "version" : "2.1.2"
       }
     },
     {
-      "identity" : "swiftformat",
+      "identity" : "cwlpreconditiontesting",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/nicklockwood/SwiftFormat",
+      "location" : "https://github.com/mattgallagher/CwlPreconditionTesting.git",
       "state" : {
-        "revision" : "cac06079ce883170ab44cb021faad298daeec2a5",
-        "version" : "0.52.10"
+        "revision" : "dc9af4781f2afdd1e68e90f80b8603be73ea7abc",
+        "version" : "2.2.0"
+      }
+    },
+    {
+      "identity" : "nimble",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Quick/Nimble.git",
+      "state" : {
+        "revision" : "d616f15123bfb36db1b1075153f73cf40605b39d",
+        "version" : "13.0.0"
+      }
+    },
+    {
+      "identity" : "quick",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Quick/Quick.git",
+      "state" : {
+        "revision" : "ef9aaf3f634b3a1ab6f54f1173fe2400b36e7cb8",
+        "version" : "7.3.0"
+      }
+    },
+    {
+      "identity" : "swift-msgpack",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nnabeyang/swift-msgpack.git",
+      "state" : {
+        "revision" : "01a4324add1dbcba63dc74a8febb02291622b532",
+        "version" : "0.3.3"
       }
     }
   ],

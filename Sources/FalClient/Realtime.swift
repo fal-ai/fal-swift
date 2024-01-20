@@ -1,7 +1,7 @@
 
 import Dispatch
 import Foundation
-import MessagePack
+import SwiftMsgpack
 
 func throttle<T>(_ function: @escaping (T) -> Void, throttleInterval: DispatchTimeInterval) -> ((T) -> Void) {
     var lastExecution = DispatchTime.now()
@@ -20,7 +20,7 @@ public enum FalRealtimeError: Error {
     case connectionError(code: Int? = nil)
     case unauthorized
     case invalidInput
-    case invalidResult
+    case invalidResult(requestId: String? = nil, causedBy: Error? = nil)
     case serviceError(type: String, reason: String)
 }
 
@@ -95,13 +95,13 @@ public class BaseRealtimeConnection<Input: Encodable> {
     func sendJSON(_ data: Input) throws {
         let jsonData = try JSONEncoder().encode(data)
         guard let json = String(data: jsonData, encoding: .utf8) else {
-            throw FalRealtimeError.invalidResult
+            throw FalRealtimeError.invalidInput
         }
         try sendReference(.string(json))
     }
 
     func sendBinary(_ data: Input) throws {
-        let payload = try MessagePackEncoder().encode(data)
+        let payload = try MsgPackEncoder().encode(data)
         try sendReference(.data(payload))
     }
 }
@@ -112,16 +112,17 @@ public class RealtimeConnection: BaseRealtimeConnection<Payload> {}
 /// Connection implementation that can be used to send messages using a custom `Encodable` type.
 public class TypedRealtimeConnection<Input: Encodable>: BaseRealtimeConnection<Input> {}
 
-func buildRealtimeUrl(forApp app: String, host: String, token: String? = nil) -> URL {
-    var components = URLComponents()
+func buildRealtimeUrl(forApp app: String, token: String? = nil) -> URL {
+    guard var components = URLComponents(string: buildUrl(fromId: app, path: "/ws")) else {
+        preconditionFailure("Invalid URL. This is unexpected and likely a problem in the client library.")
+    }
     components.scheme = "wss"
-    components.host = "\(app).\(host)"
-    components.path = "/ws"
 
     if let token {
         components.queryItems = [URLQueryItem(name: "fal_jwt_token", value: token)]
     }
 
+    print(components.url!)
     // swiftlint:disable:next force_unwrapping
     return components.url!
 }
@@ -188,10 +189,8 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
                 return
             }
 
-            // TODO: get host from config
             let url = buildRealtimeUrl(
                 forApp: app,
-                host: "gateway.alpha.fal.ai",
                 token: token
             )
             let webSocketTask = session.webSocketTask(with: url)
@@ -206,11 +205,9 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
 
     func refreshToken(_ app: String, completion: @escaping (Result<String, Error>) -> Void) {
         Task {
-            // TODO: improve app alias resolution
-            let appAlias = app.split(separator: "-").dropFirst().joined(separator: "-")
             let url = "https://rest.alpha.fal.ai/tokens/"
-            let body: Payload = [
-                "allowed_apps": [.string(appAlias)],
+            let body: Payload = try [
+                "allowed_apps": [.string(appAlias(fromId: app))],
                 "token_expiration": 300,
             ]
             do {
@@ -237,7 +234,7 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
                 do {
                     self?.receiveMessage()
 
-                    var object = try message.decode(to: Payload.self)
+                    let object = try message.decode(to: Payload.self)
                     if isSuccessResult(object) {
                         self?.onMessage(message)
                         return
@@ -350,7 +347,7 @@ extension WebSocketMessage {
             return data
         case let .string(string):
             guard let data = string.data(using: .utf8) else {
-                throw FalRealtimeError.invalidResult
+                throw FalRealtimeError.invalidResult()
             }
             return data
         @unknown default:
@@ -361,7 +358,7 @@ extension WebSocketMessage {
     func decode<Type: Decodable>(to type: Type.Type) throws -> Type {
         switch self {
         case let .data(data):
-            return try MessagePackDecoder().decode(type, from: data)
+            return try MsgPackDecoder().decode(type, from: data)
         case .string:
             return try JSONDecoder().decode(type, from: data())
         @unknown default:
