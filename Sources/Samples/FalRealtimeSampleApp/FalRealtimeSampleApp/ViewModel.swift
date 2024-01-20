@@ -3,7 +3,7 @@ import SwiftUI
 
 // See https://www.fal.ai/models/latent-consistency-sd/api for API documentation
 
-let OptimizedLatentConsistency = "110602490-lcm-sd15-i2i"
+let OptimizedLatentConsistency = "fal-ai/lcm-sd15-i2i"
 
 struct LcmInput: Encodable {
     let prompt: String

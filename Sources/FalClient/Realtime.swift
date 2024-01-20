@@ -20,7 +20,7 @@ public enum FalRealtimeError: Error {
     case connectionError(code: Int? = nil)
     case unauthorized
     case invalidInput
-    case invalidResult
+    case invalidResult(requestId: String? = nil, causedBy: Error? = nil)
     case serviceError(type: String, reason: String)
 }
 
@@ -95,7 +95,7 @@ public class BaseRealtimeConnection<Input: Encodable> {
     func sendJSON(_ data: Input) throws {
         let jsonData = try JSONEncoder().encode(data)
         guard let json = String(data: jsonData, encoding: .utf8) else {
-            throw FalRealtimeError.invalidResult
+            throw FalRealtimeError.invalidInput
         }
         try sendReference(.string(json))
     }
@@ -122,6 +122,7 @@ func buildRealtimeUrl(forApp app: String, token: String? = nil) -> URL {
         components.queryItems = [URLQueryItem(name: "fal_jwt_token", value: token)]
     }
 
+    print(components.url!)
     // swiftlint:disable:next force_unwrapping
     return components.url!
 }
@@ -204,11 +205,9 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
 
     func refreshToken(_ app: String, completion: @escaping (Result<String, Error>) -> Void) {
         Task {
-            // TODO: improve app alias resolution
-            let appAlias = app.split(separator: "-").dropFirst().joined(separator: "-")
             let url = "https://rest.alpha.fal.ai/tokens/"
-            let body: Payload = [
-                "allowed_apps": [.string(appAlias)],
+            let body: Payload = try [
+                "allowed_apps": [.string(appAlias(fromId: app))],
                 "token_expiration": 300,
             ]
             do {
@@ -348,7 +347,7 @@ extension WebSocketMessage {
             return data
         case let .string(string):
             guard let data = string.data(using: .utf8) else {
-                throw FalRealtimeError.invalidResult
+                throw FalRealtimeError.invalidResult()
             }
             return data
         @unknown default:

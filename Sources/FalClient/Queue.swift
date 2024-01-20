@@ -49,8 +49,23 @@ public struct QueueStatusInput: Encodable {
 public struct QueueClient: Queue {
     public let client: Client
 
+    func runOnQueue(_ app: String, input: Payload?, options: RunOptions) async throws -> Payload {
+        var requestInput = input
+        if let storage = client.storage as? StorageClient,
+           let input,
+           options.httpMethod != .get,
+           input.hasBinaryData
+        {
+            requestInput = try await storage.autoUpload(input: input)
+        }
+        let queryParams = options.httpMethod == .get ? input : nil
+        let url = buildUrl(fromId: app, path: options.path, subdomain: "queue")
+        let data = try await client.sendRequest(to: url, input: requestInput?.json(), queryParams: queryParams?.asDictionary, options: options)
+        return try .create(fromJSON: data)
+    }
+
     public func submit(_ id: String, input: Payload?, webhookUrl _: String?) async throws -> String {
-        let result = try await client.run(id, input: input, options: .route("/fal/queue/submit"))
+        let result = try await runOnQueue(id, input: input, options: .withMethod(.post))
         guard case let .string(requestId) = result["request_id"] else {
             throw FalError.invalidResultFormat
         }
@@ -58,18 +73,20 @@ public struct QueueClient: Queue {
     }
 
     public func status(_ id: String, of requestId: String, includeLogs: Bool) async throws -> QueueStatus {
-        try await client.run(
+        let result = try await runOnQueue(
             id,
-            input: QueueStatusInput(logs: includeLogs),
-            options: .route("/fal/queue/requests/\(requestId)/status", withMethod: .get)
+            input: ["logs": .bool(includeLogs)],
+            options: .route("/requests/\(requestId)/status", withMethod: .get)
         )
+        let json = try result.json()
+        return try JSONDecoder().decode(QueueStatus.self, from: json)
     }
 
     public func response(_ id: String, of requestId: String) async throws -> Payload {
-        try await client.run(
+        try await runOnQueue(
             id,
             input: nil as Payload?,
-            options: .route("/fal/queue/requests/\(requestId)/response", withMethod: .get)
+            options: .route("/requests/\(requestId)", withMethod: .get)
         )
     }
 }
