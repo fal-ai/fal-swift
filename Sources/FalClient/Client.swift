@@ -43,6 +43,7 @@ public protocol Client {
 
     func subscribe(
         to app: String,
+        path: String?,
         input: Payload?,
         pollInterval: DispatchTimeInterval,
         timeout: DispatchTimeInterval,
@@ -82,6 +83,7 @@ public extension Client {
     ///   - onQueueUpdate: A callback to be called when the queue status is updated.
     func subscribe(
         to app: String,
+        path: String? = nil,
         input: Payload? = nil,
         pollInterval: DispatchTimeInterval = .seconds(1),
         timeout: DispatchTimeInterval = .minutes(3),
@@ -89,6 +91,7 @@ public extension Client {
         onQueueUpdate: OnQueueUpdate? = nil
     ) async throws -> Payload {
         try await subscribe(to: app,
+                            path: path,
                             input: input,
                             pollInterval: pollInterval,
                             timeout: timeout,

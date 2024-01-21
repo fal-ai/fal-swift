@@ -46,13 +46,14 @@ public struct FalClient: Client {
 
     public func subscribe(
         to app: String,
+        path: String?,
         input: Payload?,
         pollInterval: DispatchTimeInterval,
         timeout: DispatchTimeInterval,
         includeLogs: Bool,
         onQueueUpdate: OnQueueUpdate?
     ) async throws -> Payload {
-        let requestId = try await queue.submit(app, input: input)
+        let requestId = try await queue.submit(app, path: path, input: input)
         let start = Int(Date().timeIntervalSince1970 * 1000)
         var elapsed = 0
         var isCompleted = false
