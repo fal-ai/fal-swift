@@ -7,7 +7,7 @@ public protocol Queue {
     /// Submits a request to the given [id], an optional [path]. This method
     /// uses the [queue] API to initiate the request. Next you need to rely on
     /// [status] and [result] to poll for the result.
-    func submit(_ id: String, input: Payload?, webhookUrl: String?) async throws -> String
+    func submit(_ id: String, path: String?, input: Payload?, webhookUrl: String?) async throws -> String
 
     /// Checks the queue for the status of the request with the given [requestId].
     /// See [QueueStatus] for the different statuses.
@@ -24,8 +24,8 @@ public protocol Queue {
 }
 
 public extension Queue {
-    func submit(_ id: String, input: Payload? = nil, webhookUrl: String? = nil) async throws -> String {
-        try await submit(id, input: input, webhookUrl: webhookUrl)
+    func submit(_ id: String, path: String? = nil, input: Payload? = nil, webhookUrl: String? = nil) async throws -> String {
+        try await submit(id, path: path, input: input, webhookUrl: webhookUrl)
     }
 
     func status(_ id: String, of requestId: String, includeLogs: Bool = false) async throws -> QueueStatus {
@@ -64,8 +64,8 @@ public struct QueueClient: Queue {
         return try .create(fromJSON: data)
     }
 
-    public func submit(_ id: String, input: Payload?, webhookUrl _: String?) async throws -> String {
-        let result = try await runOnQueue(id, input: input, options: .withMethod(.post))
+    public func submit(_ id: String, path: String?, input: Payload?, webhookUrl _: String?) async throws -> String {
+        let result = try await runOnQueue(id, input: input, options: .route(path ?? "", withMethod: .post))
         guard case let .string(requestId) = result["request_id"] else {
             throw FalError.invalidResultFormat
         }

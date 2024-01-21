@@ -18,7 +18,7 @@ struct ContentView: View {
                         isLoading = true
                         do {
                             let result = try await fal.subscribe(
-                                to: "110602490-fast-sdxl",
+                                to: "fal-ai/fast-sdxl",
                                 input: [
                                     "prompt": .string(PROMPT),
                                 ],
