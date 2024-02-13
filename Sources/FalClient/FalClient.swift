@@ -58,7 +58,6 @@ public struct FalClient: Client {
         var elapsed: Int64 = 0
         var isCompleted = false
         while elapsed < timeout.milliseconds {
-            print("elapsed \(elapsed)")
             let update = try await queue.status(app, of: requestId, includeLogs: includeLogs)
             if let onQueueUpdateCallback = onQueueUpdate {
                 onQueueUpdateCallback(update)
