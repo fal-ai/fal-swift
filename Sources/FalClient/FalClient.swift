@@ -54,8 +54,8 @@ public struct FalClient: Client {
         onQueueUpdate: OnQueueUpdate?
     ) async throws -> Payload {
         let requestId = try await queue.submit(app, path: path, input: input)
-        let start = Int(Date().timeIntervalSince1970 * 1000)
-        var elapsed = 0
+        let start = Int64(Date().timeIntervalSince1970 * 1000)
+        var elapsed: Int64 = 0
         var isCompleted = false
         while elapsed < timeout.milliseconds {
             let update = try await queue.status(app, of: requestId, includeLogs: includeLogs)
@@ -67,7 +67,7 @@ public struct FalClient: Client {
                 break
             }
             try await Task.sleep(nanoseconds: UInt64(Int(pollInterval.milliseconds * 1_000_000)))
-            elapsed += Int(Date().timeIntervalSince1970 * 1000) - start
+            elapsed = Int64(Date().timeIntervalSince1970 * 1000) - start
         }
         if !isCompleted {
             throw FalError.queueTimeout
