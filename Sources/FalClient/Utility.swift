@@ -25,9 +25,24 @@ func ensureAppIdFormat(_ id: String) throws -> String {
 }
 
 func appAlias(fromId id: String) throws -> String {
-    let appId = try ensureAppIdFormat(id)
-    guard let alias = appId.split(separator: "/").dropFirst().first else {
-        throw FalError.invalidUrl(url: id)
+    try AppId.parse(id: id).appAlias
+}
+
+struct AppId {
+    let ownerId: String
+    let appAlias: String
+    let path: String?
+
+    static func parse(id: String) throws -> Self {
+        let appId = try ensureAppIdFormat(id)
+        let parts = appId.components(separatedBy: "/")
+        guard parts.count > 1 else {
+            throw FalError.invalidAppId(id: id)
+        }
+        return Self(
+            ownerId: parts[0],
+            appAlias: parts[1],
+            path: parts.endIndex > 2 ? parts.dropFirst(2).joined(separator: "/") : nil
+        )
     }
-    return String(describing: alias)
 }

@@ -73,8 +73,9 @@ public struct QueueClient: Queue {
     }
 
     public func status(_ id: String, of requestId: String, includeLogs: Bool) async throws -> QueueStatus {
+        let appId = try AppId.parse(id: id)
         let result = try await runOnQueue(
-            id,
+            "\(appId.ownerId)/\(appId.appAlias)",
             input: ["logs": .bool(includeLogs)],
             options: .route("/requests/\(requestId)/status", withMethod: .get)
         )
@@ -83,8 +84,9 @@ public struct QueueClient: Queue {
     }
 
     public func response(_ id: String, of requestId: String) async throws -> Payload {
-        try await runOnQueue(
-            id,
+        let appId = try AppId.parse(id: id)
+        return try await runOnQueue(
+            "\(appId.ownerId)/\(appId.appAlias)",
             input: nil as Payload?,
             options: .route("/requests/\(requestId)", withMethod: .get)
         )
