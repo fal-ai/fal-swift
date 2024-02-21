@@ -117,7 +117,7 @@ public extension Client {
         includeLogs: Bool = false,
         onQueueUpdate: OnQueueUpdate? = nil
     ) async throws -> Payload {
-        let appId = path.map { "\(app)/\($0)" } ?? app
+        let appId = path.map { "\(app)\($0)" } ?? app
         return try await subscribe(to: appId,
                                    input: input,
                                    pollInterval: pollInterval,
