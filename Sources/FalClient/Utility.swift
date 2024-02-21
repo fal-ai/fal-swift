@@ -8,7 +8,7 @@ func buildUrl(fromId id: String, path: String? = nil, subdomain: String? = nil) 
 
 func ensureAppIdFormat(_ id: String) throws -> String {
     let parts = id.split(separator: "/")
-    if parts.count == 2 {
+    if parts.count > 1 {
         return id
     }
     let regex = try NSRegularExpression(pattern: "^([0-9]+)-([a-zA-Z0-9-]+)$")
@@ -26,7 +26,7 @@ func ensureAppIdFormat(_ id: String) throws -> String {
 
 func appAlias(fromId id: String) throws -> String {
     let appId = try ensureAppIdFormat(id)
-    guard let alias = appId.split(separator: "/").last else {
+    guard let alias = appId.split(separator: "/").dropFirst().first else {
         throw FalError.invalidUrl(url: id)
     }
     return String(describing: alias)

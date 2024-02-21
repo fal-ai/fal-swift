@@ -41,9 +41,19 @@ public protocol Client {
 
     func run(_ id: String, input: Payload?, options: RunOptions) async throws -> Payload
 
+    @available(*, deprecated, message: "Pass the path as part of the app identifier instead")
     func subscribe(
         to app: String,
         path: String?,
+        input: Payload?,
+        pollInterval: DispatchTimeInterval,
+        timeout: DispatchTimeInterval,
+        includeLogs: Bool,
+        onQueueUpdate: OnQueueUpdate?
+    ) async throws -> Payload
+
+    func subscribe(
+        to app: String,
         input: Payload?,
         pollInterval: DispatchTimeInterval,
         timeout: DispatchTimeInterval,
@@ -68,8 +78,8 @@ public extension Client {
         try await run(app, input: input, options: options)
     }
 
-    /// Submits a request to the given [app], an optional [path]. This method
-    /// uses the [queue] API to submit the request and poll for the result.
+    /// Submits a request to the given [app]. This method uses the [queue] API
+    /// to submit the request and poll for the result.
     ///
     /// This is useful for long running requests, and it's the preffered way
     /// to interact with the model APIs.
@@ -83,7 +93,6 @@ public extension Client {
     ///   - onQueueUpdate: A callback to be called when the queue status is updated.
     func subscribe(
         to app: String,
-        path: String? = nil,
         input: Payload? = nil,
         pollInterval: DispatchTimeInterval = .seconds(1),
         timeout: DispatchTimeInterval = .minutes(3),
@@ -91,11 +100,29 @@ public extension Client {
         onQueueUpdate: OnQueueUpdate? = nil
     ) async throws -> Payload {
         try await subscribe(to: app,
-                            path: path,
                             input: input,
                             pollInterval: pollInterval,
                             timeout: timeout,
                             includeLogs: includeLogs,
                             onQueueUpdate: onQueueUpdate)
+    }
+
+    @available(*, deprecated, message: "Pass the path as part of the app identifier instead")
+    func subscribe(
+        to app: String,
+        path: String? = nil,
+        input: Payload? = nil,
+        pollInterval: DispatchTimeInterval = .seconds(1),
+        timeout: DispatchTimeInterval = .minutes(3),
+        includeLogs: Bool = false,
+        onQueueUpdate: OnQueueUpdate? = nil
+    ) async throws -> Payload {
+        let appId = path.map { "\(app)\($0)" } ?? app
+        return try await subscribe(to: appId,
+                                   input: input,
+                                   pollInterval: pollInterval,
+                                   timeout: timeout,
+                                   includeLogs: includeLogs,
+                                   onQueueUpdate: onQueueUpdate)
     }
 }

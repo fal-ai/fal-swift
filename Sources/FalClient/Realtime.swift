@@ -60,6 +60,9 @@ func hasBinaryField(_ type: Encodable) -> Bool {
         if child.value is Data {
             return true
         }
+        if case FalImageContent.raw = child.value {
+            return true
+        }
     }
     return false
 }
@@ -112,8 +115,23 @@ public class RealtimeConnection: BaseRealtimeConnection<Payload> {}
 /// Connection implementation that can be used to send messages using a custom `Encodable` type.
 public class TypedRealtimeConnection<Input: Encodable>: BaseRealtimeConnection<Input> {}
 
+/// This is a list of apps deployed before formal realtime support. Their URLs follow
+/// a different pattern and will be kept here until we fully sunset them.
+let LegacyApps = [
+    "lcm-sd15-i2i",
+    "lcm",
+    "sdxl-turbo-realtime",
+    "sd-turbo-real-time-high-fps-msgpack-a10g",
+    "lcm-plexed-sd15-i2i",
+    "sd-turbo-real-time-high-fps-msgpack",
+]
+
 func buildRealtimeUrl(forApp app: String, token: String? = nil) -> URL {
-    guard var components = URLComponents(string: buildUrl(fromId: app, path: "/ws")) else {
+    // Some basic support for old ids, this should be removed during 1.0.0 release
+    // For full-support of old ids, users can point to version 0.4.x
+    let appAlias = (try? appAlias(fromId: app)) ?? app
+    let path = LegacyApps.contains(appAlias) || !app.contains("/") ? "/ws" : "/realtime"
+    guard var components = URLComponents(string: buildUrl(fromId: app, path: path)) else {
         preconditionFailure("Invalid URL. This is unexpected and likely a problem in the client library.")
     }
     components.scheme = "wss"
@@ -121,8 +139,6 @@ func buildRealtimeUrl(forApp app: String, token: String? = nil) -> URL {
     if let token {
         components.queryItems = [URLQueryItem(name: "fal_jwt_token", value: token)]
     }
-
-    print(components.url!)
     // swiftlint:disable:next force_unwrapping
     return components.url!
 }

@@ -1,10 +1,6 @@
 import FalClient
 import SwiftUI
 
-// See https://www.fal.ai/models/latent-consistency-sd/api for API documentation
-
-let OptimizedLatentConsistency = "fal-ai/lcm-sd15-i2i"
-
 struct LcmInput: Encodable {
     let prompt: String
     let image: FalImageContent
@@ -28,12 +24,13 @@ class LiveImage: ObservableObject {
 
     // This example demonstrates the support to Codable types, but
     // RealtimeConnection can also be used for untyped input / output
-    // using dictionary-like ObjectValue
+    // using dictionary-like Payload
     private var connection: TypedRealtimeConnection<LcmInput>?
 
     init() {
         connection = try? fal.realtime.connect(
-            to: OptimizedLatentConsistency,
+            // See https://fal.ai/models/latent-consistency-sd/api
+            to: "fal-ai/lcm-sd15-i2i",
             connectionKey: "PencilKitDemo",
             throttleInterval: .milliseconds(128)
         ) { (result: Result<LcmResponse, Error>) in
