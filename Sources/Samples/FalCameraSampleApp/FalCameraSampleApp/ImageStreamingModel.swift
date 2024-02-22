@@ -31,7 +31,7 @@ class ImageStreamingModel: ObservableObject, ImageStreamingDelegate {
     init(imageStreaming: ImageStreaming = ImageStreaming()) {
         // simplified error handling for demo purposes
         connection = try? fal.realtime.connect(
-            to: TurboApp,
+            to: "fal-ai/fast-turbo-diffusion/image-to-image",
             connectionKey: "swift-realtime-camera-demo",
             throttleInterval: .never
         ) { result in

@@ -18,10 +18,12 @@ struct ContentView: View {
                         isLoading = true
                         do {
                             let result = try await fal.subscribe(
-                                to: "fal-ai/fast-sdxl",
+                                to: "fal-ai/fast-lightning-sdxl",
                                 input: [
                                     "prompt": .string(PROMPT),
                                 ],
+                                pollInterval: .milliseconds(500),
+                                timeout: .seconds(5),
                                 includeLogs: true
                             ) { update in
                                 update.logs
