@@ -91,21 +91,6 @@ public extension Client {
     ///   - timeout: The timeout to wait for the result. Defaults to 3 minutes.
     ///   - includeLogs: Whether to include logs in the result. Defaults to false.
     ///   - onQueueUpdate: A callback to be called when the queue status is updated.
-    // func subscribe(
-    //     to app: String,
-    //     input: Payload? = nil,
-    //     pollInterval: DispatchTimeInterval = .seconds(1),
-    //     timeout: DispatchTimeInterval = .minutes(3),
-    //     includeLogs: Bool = false,
-    //     onQueueUpdate: OnQueueUpdate? = nil
-    // ) async throws -> Payload {
-    //     try await subscribe(to: app,
-    //                         input: input,
-    //                         pollInterval: pollInterval,
-    //                         timeout: timeout,
-    //                         includeLogs: includeLogs,
-    //                         onQueueUpdate: onQueueUpdate)
-    // }
 
     @available(*, deprecated, message: "Pass the path as part of the app identifier instead")
     func subscribe(
