@@ -349,7 +349,11 @@ func isSuccessResult(_ message: Payload) -> Bool {
 func getError(_ message: Payload) -> FalRealtimeError? {
     if message["type"].stringValue == "x-fal-error",
        let error = message["error"].stringValue,
-       let reason = message["reason"].stringValue
+       let reason = message["reason"].stringValue,
+       // The timeout error is expected as the websocket endpoint returns that
+       // when no input has ben sent for a while. It's safe to ignore and should
+       // not trigger the onError callback of the client
+       error != "TIMEOUT"
     {
         return FalRealtimeError.serviceError(type: error, reason: reason)
     }
