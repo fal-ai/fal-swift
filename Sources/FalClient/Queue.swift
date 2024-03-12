@@ -32,23 +32,8 @@ public extension Queue {
     }
 }
 
-public struct QueueStatusInput: Encodable {
-    let logs: Bool
-
-    enum CodingKeys: String, CodingKey {
-        case logs
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(logs ? 1 : 0, forKey: .logs)
-    }
-}
-
-public struct QueueClient: Queue {
-    public let client: Client
-
-    func runOnQueue(_ app: String, input: Payload?, queryParams params: [String: Any] = [:], options: RunOptions = .withMethod(.post)) async throws -> Payload {
+extension Queue {
+    func runOnQueue<Output: Decodable>(_ app: String, input: Payload?, queryParams params: [String: Any] = [:], options: RunOptions = .withMethod(.post)) async throws -> Output {
         var requestInput = input
         if let storage = client.storage as? StorageClient,
            let input,
@@ -67,12 +52,18 @@ public struct QueueClient: Queue {
 
         let url = buildUrl(fromId: app, path: options.path, subdomain: "queue")
         let data = try await client.sendRequest(to: url, input: requestInput?.json(), queryParams: params, options: options)
-        return try .create(fromJSON: data)
+
+        let decoder = JSONDecoder()
+        return try decoder.decode(Output.self, from: data)
     }
+}
+
+public struct QueueClient: Queue {
+    public let client: Client
 
     public func submit(_ id: String, input: Payload?, webhookUrl: String?) async throws -> String {
         let queryParams: [String: Any] = webhookUrl != nil ? ["fal_webhook": webhookUrl ?? ""] : [:]
-        let result = try await runOnQueue(id, input: input, queryParams: queryParams, options: .withMethod(.post))
+        let result: Payload = try await runOnQueue(id, input: input, queryParams: queryParams, options: .withMethod(.post))
         guard case let .string(requestId) = result["request_id"] else {
             throw FalError.invalidResultFormat
         }
@@ -81,7 +72,7 @@ public struct QueueClient: Queue {
 
     public func status(_ id: String, of requestId: String, includeLogs: Bool) async throws -> QueueStatus {
         let appId = try AppId.parse(id: id)
-        let result = try await runOnQueue(
+        let result: QueueStatus = try await runOnQueue(
             "\(appId.ownerId)/\(appId.appAlias)",
             input: nil,
             queryParams: [
@@ -89,8 +80,7 @@ public struct QueueClient: Queue {
             ],
             options: .route("/requests/\(requestId)/status", withMethod: .get)
         )
-        let json = try result.json()
-        return try JSONDecoder().decode(QueueStatus.self, from: json)
+        return result
     }
 
     public func response(_ id: String, of requestId: String) async throws -> Payload {
