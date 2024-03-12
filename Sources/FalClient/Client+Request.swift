@@ -15,6 +15,7 @@ extension Client {
         }
 
         if let queryParams,
+           !queryParams.isEmpty,
            var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
         {
             urlComponents.queryItems = queryParams.map {
