@@ -24,6 +24,7 @@ extension Client {
             url = urlComponents.url ?? url
         }
 
+        let targetUrl = url
         if let requestProxy = config.requestProxy {
             guard let proxyUrl = URL(string: requestProxy) else {
                 throw FalError.invalidUrl(url: requestProxy)
@@ -45,7 +46,7 @@ extension Client {
 
         // setup the request proxy if available
         if config.requestProxy != nil {
-            request.setValue(urlString, forHTTPHeaderField: "x-fal-target-url")
+            request.setValue(targetUrl.absoluteString, forHTTPHeaderField: "x-fal-target-url")
         }
 
         if input != nil, options.httpMethod != .get {
