@@ -32,9 +32,11 @@ public enum ClientCredentials: CustomStringConvertible {
 public struct ClientConfig {
     public let credentials: ClientCredentials
     public let requestProxy: String?
+    public let customHeaders: [String: String]?
 
-    init(credentials: ClientCredentials = .fromEnv, requestProxy: String? = nil) {
+    init(credentials: ClientCredentials = .fromEnv, requestProxy: String? = nil, customHeaders: [String: String]? = nil) {
         self.credentials = credentials
         self.requestProxy = requestProxy
+        self.customHeaders = customHeaders
     }
 }
