@@ -33,6 +33,11 @@ extension Client {
         }
 
         var request = URLRequest(url: url)
+        if let header = config.customHeaders {
+            for (key, value) in header {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+        }
         request.httpMethod = options.httpMethod.rawValue.uppercased()
         request.setValue("application/json", forHTTPHeaderField: "accept")
         request.setValue("application/json", forHTTPHeaderField: "content-type")
