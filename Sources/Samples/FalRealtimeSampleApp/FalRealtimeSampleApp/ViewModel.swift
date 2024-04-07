@@ -1,47 +1,46 @@
 import FalClient
 import SwiftUI
 
-struct LcmInput: Encodable {
+struct TurboInput: Encodable {
     let prompt: String
-    let image: FalImageContent
+    let image: Data
     let seed: Int
     let syncMode: Bool
+    let strength: Float
 
     enum CodingKeys: String, CodingKey {
         case prompt
-        case image = "image_url"
+        case image = "image_bytes"
         case seed
         case syncMode = "sync_mode"
+        case strength
     }
 }
 
-struct LcmResponse: Decodable {
+struct TurboResponse: Decodable {
     let images: [FalImage]
 }
 
 class LiveImage: ObservableObject {
     @Published var currentImage: Data?
 
-    // This example demonstrates the support to Codable types, but
-    // RealtimeConnection can also be used for untyped input / output
-    // using dictionary-like Payload
-    private var connection: TypedRealtimeConnection<LcmInput>?
+    private var connection: TypedRealtimeConnection<TurboInput>?
 
     init() {
         connection = try? fal.realtime.connect(
-            // See https://fal.ai/models/latent-consistency-sd/api
-            to: "fal-ai/lcm-sd15-i2i",
+            to: "fal-ai/fast-turbo-diffusion/image-to-image",
             connectionKey: "PencilKitDemo",
-            throttleInterval: .milliseconds(128)
-        ) { (result: Result<LcmResponse, Error>) in
+            throttleInterval: .never
+        ) { (result: Result<TurboResponse, Error>) in
             if case let .success(data) = result,
-               let image = data.images.first
+               case let imageData = data.images[0].content.data
             {
                 DispatchQueue.main.async {
-                    self.currentImage = image.content.data
+                    self.currentImage = imageData
                 }
             }
             if case let .failure(error) = result {
+                print("-------------- Error")
                 print(error)
             }
         }
@@ -49,11 +48,12 @@ class LiveImage: ObservableObject {
 
     func generate(prompt: String, drawing: Data) throws {
         if let connection {
-            try connection.send(LcmInput(
+            try connection.send(TurboInput(
                 prompt: prompt,
-                image: "data:image/jpeg;base64,\(drawing.base64EncodedString())",
+                image: drawing,
                 seed: 6_252_023,
-                syncMode: true
+                syncMode: true,
+                strength: 0.6
             ))
         }
     }
