@@ -126,23 +126,6 @@ let LegacyApps = [
     "sd-turbo-real-time-high-fps-msgpack",
 ]
 
-func buildRealtimeUrl(forApp app: String, token: String? = nil) -> URL {
-    // Some basic support for old ids, this should be removed during 1.0.0 release
-    // For full-support of old ids, users can point to version 0.4.x
-    let appAlias = (try? appAlias(fromId: app)) ?? app
-    let path = LegacyApps.contains(appAlias) || !app.contains("/") ? "/ws" : "/realtime"
-    guard var components = URLComponents(string: buildUrl(fromId: app, path: path)) else {
-        preconditionFailure("Invalid URL. This is unexpected and likely a problem in the client library.")
-    }
-    components.scheme = "wss"
-
-    if let token {
-        components.queryItems = [URLQueryItem(name: "fal_jwt_token", value: token)]
-    }
-    // swiftlint:disable:next force_unwrapping
-    return components.url!
-}
-
 typealias RefreshTokenFunction = (String, (Result<String, Error>) -> Void) -> Void
 
 private let TokenExpirationInterval: DispatchTimeInterval = .minutes(1)
@@ -205,10 +188,7 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
                 return
             }
 
-            let url = buildRealtimeUrl(
-                forApp: app,
-                token: token
-            )
+            let url = buildRealtimeUrl(token: token)
             let webSocketTask = session.webSocketTask(with: url)
             webSocketTask.delegate = self
             task = webSocketTask
@@ -221,22 +201,9 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
 
     func refreshToken(_ app: String, completion: @escaping (Result<String, Error>) -> Void) {
         Task {
-            let url = "https://rest.alpha.fal.ai/tokens/"
-            let body: Payload = try [
-                "allowed_apps": [.string(appAlias(fromId: app))],
-                "token_expiration": 300,
-            ]
             do {
-                let response = try await self.client.sendRequest(
-                    to: url,
-                    input: body.json(),
-                    options: .withMethod(.post)
-                )
-                if let token = String(data: response, encoding: .utf8) {
-                    completion(.success(token.replacingOccurrences(of: "\"", with: "")))
-                } else {
-                    completion(.failure(FalRealtimeError.unauthorized))
-                }
+                let token = try await self.client.fetchTemporaryAuthToken(for: app)
+                completion(.success(token.replacingOccurrences(of: "\"", with: "")))
             } catch {
                 completion(.failure(error))
             }
@@ -323,6 +290,18 @@ class WebSocketConnection: NSObject, URLSessionWebSocketDelegate {
             onError(FalRealtimeError.connectionError(code: code.rawValue))
         }
         task = nil
+    }
+
+    private func buildRealtimeUrl(token: String? = nil) -> URL {
+        // Some basic support for old ids, this should be removed during 1.0.0 release
+        // For full-support of old ids, users can point to version 0.4.x
+        let appAlias = (try? appAlias(fromId: app)) ?? app
+        let path = LegacyApps.contains(appAlias) || !app.contains("/") ? "/ws" : "/realtime"
+        var queryParams: [String: String] = [:]
+        if let token {
+            queryParams["fal_jwt_token"] = token
+        }
+        return client.buildEndpointUrl(fromId: app, path: path, scheme: "wss", queryParams: queryParams)
     }
 }
 

@@ -37,6 +37,8 @@ public protocol Client {
 
     var realtime: Realtime { get }
 
+    var streaming: Streaming { get }
+
     var storage: Storage { get }
 
     func run(_ id: String, input: Payload?, options: RunOptions) async throws -> Payload
@@ -60,6 +62,12 @@ public protocol Client {
         includeLogs: Bool,
         onQueueUpdate: OnQueueUpdate?
     ) async throws -> Payload
+
+    func stream<Input, Output>(
+        from endpointId: String,
+        input: Input,
+        timeout: DispatchTimeInterval
+    ) async throws -> FalStream<Input, Output> where Input: Encodable, Output: Decodable
 }
 
 public extension Client {
@@ -124,5 +132,13 @@ public extension Client {
                                    timeout: timeout,
                                    includeLogs: includeLogs,
                                    onQueueUpdate: onQueueUpdate)
+    }
+
+    func stream<Input, Output>(
+        from endpointId: String,
+        input: Input,
+        timeout: DispatchTimeInterval = .seconds(60)
+    ) async throws -> FalStream<Input, Output> where Input: Encodable, Output: Decodable {
+        try await streaming.stream(from: endpointId, input: input, timeout: timeout)
     }
 }

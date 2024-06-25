@@ -57,6 +57,37 @@ extension Client {
         return data
     }
 
+    func fetchTemporaryAuthToken(for endpointId: String) async throws -> String {
+        let url = "https://rest.alpha.fal.ai/tokens/"
+        let body: Payload = try [
+            "allowed_apps": [.string(appAlias(fromId: endpointId))],
+            "token_expiration": 120,
+        ]
+
+        let response = try await sendRequest(
+            to: url,
+            input: body.json(),
+            options: .withMethod(.post)
+        )
+        if let token = String(data: response, encoding: .utf8) {
+            return token.replacingOccurrences(of: "\"", with: "")
+        } else {
+            throw FalError.unauthorized(message: "Cannot generate token for \(endpointId)")
+        }
+    }
+
+    func buildEndpointUrl(fromId endpointId: String, path: String? = nil, scheme: String = "https", queryParams: [String: String] = [:]) -> URL {
+        let appId = (try? ensureAppIdFormat(endpointId)) ?? endpointId
+        guard var components = URLComponents(string: buildUrl(fromId: appId, path: path)) else {
+            preconditionFailure("Invalid URL. This is unexpected and likely a problem in the client library.")
+        }
+        components.scheme = scheme
+        components.queryItems = queryParams.map { URLQueryItem(name: $0.key, value: $0.value) }
+
+        // swiftlint:disable:next force_unwrapping
+        return components.url!
+    }
+
     func checkResponseStatus(for response: URLResponse, withData data: Data) throws {
         guard response is HTTPURLResponse else {
             throw FalError.invalidResultFormat
@@ -77,6 +108,7 @@ extension Client {
 
     var userAgent: String {
         let osVersion = ProcessInfo.processInfo.operatingSystemVersionString
-        return "fal.ai/swift-client 0.1.0 - \(osVersion)"
+        // TODO: figure out how to parametrize this
+        return "fal.ai/swift-client 0.6.0 - \(osVersion)"
     }
 }

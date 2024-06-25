@@ -27,6 +27,8 @@ public struct FalClient: Client {
 
     public var realtime: Realtime { RealtimeClient(client: self) }
 
+    public var streaming: Streaming { StreamingClient(client: self) }
+
     public var storage: Storage { StorageClient(client: self) }
 
     public func run(_ app: String, input: Payload?, options: RunOptions) async throws -> Payload {

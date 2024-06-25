@@ -268,3 +268,23 @@ extension Payload {
         }
     }
 }
+
+extension Encodable {
+    func asPayload() throws -> Payload {
+        if let payload = self as? Payload {
+            return payload
+        }
+        let data = try JSONEncoder().encode(self)
+        return try Payload.create(fromJSON: data)
+    }
+}
+
+extension Payload {
+    func asType<T: Decodable>(_: T.Type) throws -> T {
+        if T.self == Payload.self {
+            return self as! T
+        }
+        let data = try JSONEncoder().encode(self)
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+}
