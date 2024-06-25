@@ -29,6 +29,20 @@ class UtilitySpec: QuickSpec {
                 expect(appId.appAlias).to(equal("fast-sdxl"))
                 expect(appId.path).to(equal("image-to-image"))
             }
+            it ("should parse an id with a namespace") {
+                let appId = try AppId.parse(id: "workflows/fal-ai/fast-sdxl")
+                expect(appId.ownerId).to(equal("fal-ai"))
+                expect(appId.appAlias).to(equal("fast-sdxl"))
+                expect(appId.path).to(beNil())
+                expect(appId.namespace).to(equal("workflows"))
+            }
+            it ("should parse an id with a namespace and a path") {
+                let appId = try AppId.parse(id: "comfy/fal-ai/fast-sdxl/image-to-image")
+                expect(appId.ownerId).to(equal("fal-ai"))
+                expect(appId.appAlias).to(equal("fast-sdxl"))
+                expect(appId.path).to(equal("image-to-image"))
+                expect(appId.namespace).to(equal("comfy"))
+            }
         }
     }
 }
