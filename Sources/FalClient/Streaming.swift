@@ -62,7 +62,7 @@ public class FalStream<Input: Codable, Output: Codable>: AsyncSequence {
 
                 for try await content in data.lines {
                     // NOTE: naive approach that relies on each chunk to be a complete event
-                    // revisit this in case endpoints start to treat SSE differently
+                    // revisit this in case endpoints start to handle SSE differently
                     if content.starts(with: "data:") {
                         let payloadData = content.dropFirst("data:".count)
                             .trimmingCharacters(in: .whitespacesAndNewlines)
