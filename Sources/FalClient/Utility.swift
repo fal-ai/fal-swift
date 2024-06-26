@@ -28,10 +28,13 @@ func appAlias(fromId id: String) throws -> String {
     try AppId.parse(id: id).appAlias
 }
 
+let ReservedNamescapes = ["workflows", "comfy"]
+
 struct AppId {
     let ownerId: String
     let appAlias: String
     let path: String?
+    let namespace: String?
 
     static func parse(id: String) throws -> Self {
         let appId = try ensureAppIdFormat(id)
@@ -39,10 +42,18 @@ struct AppId {
         guard parts.count > 1 else {
             throw FalError.invalidAppId(id: id)
         }
+
+        var namespace: String? = nil
+        if ReservedNamescapes.contains(parts[0]) {
+            namespace = parts[0]
+        }
+
+        let startIndex = namespace != nil ? 1 : 0
         return Self(
-            ownerId: parts[0],
-            appAlias: parts[1],
-            path: parts.endIndex > 2 ? parts.dropFirst(2).joined(separator: "/") : nil
+            ownerId: parts[startIndex],
+            appAlias: parts[startIndex + 1],
+            path: parts.endIndex > startIndex + 2 ? parts.dropFirst(startIndex + 2).joined(separator: "/") : nil,
+            namespace: namespace
         )
     }
 }
